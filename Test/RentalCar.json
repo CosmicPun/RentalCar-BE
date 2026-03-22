@@ -1,0 +1,675 @@
+{
+  "info": {
+    "name": "RentalCar Full API Service",
+    "description": "Comprehensive Postman collection for the Rental Car Booking System. Includes Authentication, Provider Management, Car Management, and Booking Management with automated variable extraction.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "01. Authentication",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"test@gmail.com\",\n  \"telephone\": \"0123456789\",\n  \"password\": \"12345678\",\n  \"role\": \"user\"\n}"
+            },
+            "url": {
+              "raw": "{{URL}}/api/auth/register",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const json = pm.response.json();",
+                  "    pm.collectionVariables.set(\"TOKEN\", json.token);",
+                  "    console.log(\"Token set successfully\");",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@gmail.com\",\n  \"password\": \"12345678\"\n}"
+            },
+            "url": {
+              "raw": "{{URL}}/api/auth/login",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Me",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{URL}}/api/auth/me",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "me"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test User Updated\",\n  \"telephone\": \"0999999999\"\n}"
+            },
+            "url": {
+              "raw": "{{URL}}/api/auth/update",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "update"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.collectionVariables.set(\"TOKEN\", \"\");"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{URL}}/api/auth/logout",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "logout"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "02. Providers",
+      "item": [
+        {
+          "name": "Create Provider",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.success && json.data) {",
+                  "    pm.collectionVariables.set(\"PROVIDER_ID\", json.data._id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"City Car Rental\",\n  \"address\": \"123 Sukhumvit Road\",\n  \"district\": \"Wattana\",\n  \"province\": \"Bangkok\",\n  \"postalcode\": \"10110\",\n  \"tel\": \"021112222\",\n  \"region\": \"Central\"\n}"
+            },
+            "url": {
+              "raw": "{{URL}}/api/providers",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "providers"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Providers",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{URL}}/api/providers",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "providers"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Single Provider",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{URL}}/api/providers/{{PROVIDER_ID}}",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "providers",
+                "{{PROVIDER_ID}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Provider",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"City Car Rental (Premium)\"\n}"
+            },
+            "url": {
+              "raw": "{{URL}}/api/providers/{{PROVIDER_ID}}",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "providers",
+                "{{PROVIDER_ID}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Provider",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "url": {
+              "raw": "{{URL}}/api/providers/{{PROVIDER_ID}}",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "providers",
+                "{{PROVIDER_ID}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "03. Cars",
+      "item": [
+        {
+          "name": "Create Car",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.success && json.data) {",
+                  "    pm.collectionVariables.set(\"CAR_ID\", json.data._id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"licensePlate\": \"รถ-123\",\n  \"brand\": \"Tesla\",\n  \"model\": \"Model 3\",\n  \"year\": 2023,\n  \"color\": \"Midnight Silver\",\n  \"transmission\": \"Automatic\",\n  \"fuelType\": \"Electric\",\n  \"rentPrice\": 3500,\n  \"provider\": \"{{PROVIDER_ID}}\"\n}"
+            },
+            "url": {
+              "raw": "{{URL}}/api/cars",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "cars"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Cars",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{URL}}/api/cars",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "cars"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Single Car",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{URL}}/api/cars/{{CAR_ID}}",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "cars",
+                "{{CAR_ID}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Car",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rentPrice\": 3800\n}"
+            },
+            "url": {
+              "raw": "{{URL}}/api/cars/{{CAR_ID}}",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "cars",
+                "{{CAR_ID}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Car",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "url": {
+              "raw": "{{URL}}/api/cars/{{CAR_ID}}",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "cars",
+                "{{CAR_ID}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "04. Bookings",
+      "item": [
+        {
+          "name": "Create Booking",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.success && json.data) {",
+                  "    pm.collectionVariables.set(\"BOOKING_ID\", json.data._id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bookingDate\": \"2024-10-01T10:00:00.000Z\",\n  \"returnDate\": \"2024-10-05T10:00:00.000Z\"\n}"
+            },
+            "url": {
+              "raw": "{{URL}}/api/cars/{{CAR_ID}}/bookings",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "cars",
+                "{{CAR_ID}}",
+                "bookings"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All My Bookings",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{URL}}/api/bookings",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "bookings"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Single Booking",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{URL}}/api/bookings/{{BOOKING_ID}}",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "bookings",
+                "{{BOOKING_ID}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Booking",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"returnDate\": \"2024-10-07T10:00:00.000Z\"\n}"
+            },
+            "url": {
+              "raw": "{{URL}}/api/bookings/{{BOOKING_ID}}",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "bookings",
+                "{{BOOKING_ID}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Booking",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "url": {
+              "raw": "{{URL}}/api/bookings/{{BOOKING_ID}}",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "bookings",
+                "{{BOOKING_ID}}"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "URL",
+      "value": "http://localhost:5001"
+    },
+    {
+      "key": "TOKEN",
+      "value": ""
+    },
+    {
+      "key": "PROVIDER_ID",
+      "value": ""
+    },
+    {
+      "key": "CAR_ID",
+      "value": ""
+    },
+    {
+      "key": "BOOKING_ID",
+      "value": ""
+    }
+  ]
+}

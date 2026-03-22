@@ -1,0 +1,52 @@
+@startuml seq_createCar
+
+skinparam {
+    defaultFontName Source Code Pro
+    defaultFontSize 18
+    shadowing false
+    componentStyle uml2
+    MinClassWidth 150
+    ParticipantPadding 80
+    ArrowThickness 1.5
+}
+
+actor "**User**" as User
+participant "**Cars Router**" as CR               #98FB98
+participant "**Auth Middleware**" as AM           #FF6347
+participant "**Cars Controller**" as CC           #FFD700
+participant "**Car Model**" as CM                 #87CEEB
+participant "**Provider Model**" as PM            #87CEEB
+database "**MongoDB**" as DB                      #FFDEAD
+
+== Create car (Admin only) ==
+
+User -> CR: POST /api/cars
+activate User                                     #D3D3D3
+activate CR                                       #98FB98
+CR -> AM: protect, authorize('admin')
+activate AM                                       #FF6347
+AM -> CC: createCar
+activate CC                                       #FFD700
+CC -> PM: Provider.findById(body.provider)
+activate PM                                       #87CEEB
+PM --> DB: Query provider
+activate DB                                       #FFDEAD
+DB --> PM: provider/null
+deactivate DB
+PM --> CC: provider/null
+deactivate PM
+CC -> CM: Car.create(req.body)
+activate CM                                       #87CEEB
+CM --> DB: INSERT new car
+activate DB                                       #FFDEAD
+DB --> CM: new car
+deactivate DB
+CM --> CC: new car
+deactivate CM
+CC -> User: 201 Created / 404 Provider not found
+deactivate CC
+deactivate AM
+deactivate CR
+deactivate User
+
+@enduml

@@ -1,0 +1,142 @@
+ @startuml
+left to right direction
+
+skinparam class {
+    ArrowColor black
+    BorderColor black
+    BackgroundColor white
+    FontSize 14
+    AttributeFontSize 12
+    MethodFontSize 12
+}
+skinparam nodesep 10
+skinparam ranksep 200
+
+package "Rental Car Booking System" {
+
+    class RentalCarService <<Application>>
+
+    package "Auth" as AuthPackage {
+        class Auth <<Resource>> {
+            <<POST>> +register(): User
+            <<POST>> +login(): User
+            <<GET>> +getMe(): User
+            <<PUT>> +update(): User
+            <<GET>> +logout(): void
+        }
+
+        class UserModel <<Representation>> {
+            - name: String
+            - email: String
+            - telephone: String
+            - role: String
+            - password: String
+            - createdAt: Date
+        }
+    }
+
+    package "Providers" as ProvidersPackage {
+        class Providers <<Resource>> {
+            <<GET>> +getProviders(): Provider
+            <<POST>> +createProvider(): Provider
+        }
+
+        class Provider <<Resource>> {
+            <<GET>> +getProvider(): Provider
+            <<PUT>> +updateProvider(): Provider
+            <<DELETE>> +deleteProvider(): void
+        }
+
+        class ProviderModel <<Representation>> {
+            - name: String
+            - address: String
+            - district: String
+            - province: String
+            - postalcode: String
+            - tel: String
+            - region: String
+        }
+
+    }
+
+    package "Cars" as CarsPackage {
+        class Cars <<Resource>> {
+            <<GET>> +getCars(): Car
+            <<POST>> +createCar(): Car
+        }
+
+        class Car <<Resource>> {
+            <<GET>> +getCar(): Car
+            <<PUT>> +updateCar(): Car
+            <<DELETE>> +deleteCar(): void
+        }
+
+        class CarBookings <<Resource>> {
+            <<GET>> +getBookings(): Booking
+            <<POST>> +addBooking(): Booking
+        }
+
+        class CarModel <<Representation>> {
+            - licensePlate: String
+            - brand: String
+            - model: String
+            - year: Number
+            - color: String
+            - transmission: Enum
+            - fuelType: Enum
+            - rentPrice: Number
+            - available: Boolean
+            - provider: ObjectId
+        }
+    }
+
+    package "Bookings" as BookingsPackage {
+        class Bookings <<Resource>> {
+            <<GET>> +getBookings(): Booking
+            <<POST>> +createBooking(): Booking
+        }
+
+        class Booking <<Resource>> {
+            <<GET>> +getBooking(): Booking
+            <<PUT>> +updateBooking(): Booking
+            <<DELETE>> +deleteBooking(): void
+        }
+
+        class BookingModel <<Representation>> {
+            - bookingDate: Date
+            - returnDate: Date
+            - totalCost: Number
+            - user: ObjectId
+            - car: ObjectId
+            - provider: ObjectId
+            - createdAt: Date
+        }
+    }
+
+
+    RentalCarService ..> Auth : "  /api/v1/auth\n  <<Path>>"
+
+    RentalCarService ..> Providers : "  /api/v1/providers\n  <<Path>>"
+    Providers ..> Provider : "  /{id}\n  <<Path>>"
+
+    RentalCarService ..> Cars : "  /api/v1/cars\n  <<Path>>"
+    Cars ..> Car : "  /{id}\n  <<Path>>"
+    Car ..> CarBookings : "  /bookings\n  <<Path>>"
+
+    RentalCarService ..> Bookings : "  /api/v1/bookings\n  <<Path>>"
+    Bookings ..> Booking : "  /{id}\n  <<Path>>"
+
+    Auth ..> UserModel : "<<use>>"
+
+    Providers ..> ProviderModel : "<<use>>"
+    Provider ..> ProviderModel : "<<use>>"
+
+    Cars ..> CarModel : "<<use>>"
+    Car ..> CarModel : "<<use>>"
+
+    CarBookings ..> BookingModel : "<<use>>"
+    Bookings ..> BookingModel : "<<use>>"
+    Booking ..> BookingModel : "<<use>>"
+}
+
+@enduml

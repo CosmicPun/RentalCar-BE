@@ -1,0 +1,43 @@
+@startuml seq_getBooking
+
+skinparam {
+    defaultFontName Source Code Pro
+    defaultFontSize 18
+    shadowing false
+    componentStyle uml2
+    MinClassWidth 150
+    ParticipantPadding 80
+    ArrowThickness 1.5
+}
+
+actor "**User**" as User
+participant "**Bookings Router**" as BR           #98FB98
+participant "**Auth Middleware**" as AM           #FF6347
+participant "**Bookings Controller**" as BC       #FFD700
+participant "**Booking Model**" as BM             #87CEEB
+database "**MongoDB**" as DB                      #FFDEAD
+
+== Get booking by ID ==
+
+User -> BR: GET /api/bookings/:id
+activate User                                     #D3D3D3
+activate BR                                       #98FB98
+BR -> AM: protect
+activate AM                                       #FF6347
+AM -> BC: getBooking
+activate BC                                       #FFD700
+BC -> BM: Booking.findById(id).populate(car->provider)
+activate BM                                       #87CEEB
+BM --> DB: Query booking by id
+activate DB                                       #FFDEAD
+DB --> BM: booking / null
+deactivate DB
+BM --> BC: booking / null
+deactivate BM
+BC -> User: 200 OK / 404 Not Found / 401 Unauthorized
+deactivate BC
+deactivate AM
+deactivate BR
+deactivate User
+
+@enduml

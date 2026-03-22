@@ -1,0 +1,29 @@
+@startuml seq_logout
+
+skinparam {
+    defaultFontName Source Code Pro
+    defaultFontSize 18
+    shadowing false
+    componentStyle uml2
+    MinClassWidth 150
+    ParticipantPadding 60
+    ArrowThickness 1.5
+}
+
+actor "**User**" as User
+participant "**Auth Router**" as AR          #98FB98
+participant "**Auth Controller**" as AC      #FFD700
+
+== Logout user ==
+
+User -> AR: GET /api/auth/logout
+activate User                                #D3D3D3
+activate AR                                  #98FB98
+AR -> AC: logout
+activate AC                                  #FFD700
+AC -> User: 200 OK (clear cookie if used)
+deactivate AC
+deactivate AR
+deactivate User
+
+@enduml

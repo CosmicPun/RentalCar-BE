@@ -1,0 +1,40 @@
+@startuml usecaseCar_diagram
+
+left to right direction
+
+skinparam {
+    defaultFontName Source Code Pro
+    defaultFontSize 14
+    shadowing true
+    arrowColor #666666
+    actorBorderColor #666666
+    usecaseBorderColor #333333
+    rectangleBorderColor #333333
+    rectangleBackgroundColor #f0f0f0
+    componentStyle uml2
+    ArrowThickness 1.5
+}
+
+actor User as user
+
+rectangle "Car Management" {
+    usecase "getCars" as uc_getCars
+    usecase "getCar" as uc_getCar
+    usecase "createCar" as uc_createCar
+    usecase "updateCar" as uc_updateCar
+    usecase "deleteCar" as uc_deleteCar
+}
+
+actor Admin as admin
+
+user -- uc_getCars  #Blue
+user -- uc_getCar   #Blue
+
+uc_getCars    -- admin #Red
+uc_getCar     -- admin #Red
+uc_createCar  -- admin #Red
+uc_updateCar  -- admin #Red
+uc_deleteCar  -- admin #Red
+
+@enduml
+

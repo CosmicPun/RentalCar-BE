@@ -1,0 +1,39 @@
+@startuml seq_getProvider
+
+skinparam {
+    defaultFontName Source Code Pro
+    defaultFontSize 18
+    shadowing false
+    componentStyle uml2
+    MinClassWidth 150
+    ParticipantPadding 80
+    ArrowThickness 1.5
+}
+
+actor "**User**" as User
+participant "**Providers Router**" as PR          #98FB98
+participant "**Providers Controller**" as PC      #FFD700
+participant "**Provider Model**" as PM            #87CEEB
+database "**MongoDB**" as DB                      #FFDEAD
+
+== Get provider by ID ==
+
+User -> PR: GET /api/providers/:id
+activate User                                     #D3D3D3
+activate PR                                       #98FB98
+PR -> PC: getProvider
+activate PC                                       #FFD700
+PC -> PM: Provider.findById(id).populate('bookings')
+activate PM                                       #87CEEB
+PM --> DB: Query provider by id (+virtual bookings)
+activate DB                                       #FFDEAD
+DB --> PM: provider / null
+deactivate DB
+PM --> PC: provider / null
+deactivate PM
+PC -> User: 200 OK / 404 Not Found
+deactivate PC
+deactivate PR
+deactivate User
+
+@enduml

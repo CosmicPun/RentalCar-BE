@@ -1,0 +1,73 @@
+@startuml seq_addBooking
+
+skinparam {
+    defaultFontName Source Code Pro
+    defaultFontSize 18
+    shadowing false
+    componentStyle uml2
+    MinClassWidth 150
+    ParticipantPadding 80
+    ArrowThickness 1.5
+}
+
+actor "**User**" as User
+participant "**Bookings Router**" as BR           #98FB98
+participant "**Auth Middleware**" as AM           #FF6347
+participant "**Bookings Controller**" as BC       #FFD700
+participant "**Booking Model**" as BM             #87CEEB
+participant "**Car Model**" as CM                 #87CEEB
+database "**MongoDB**" as DB                      #FFDEAD
+
+== Create booking (max 3 bookings, car must be available) ==
+
+User -> BR: POST /api/cars/:carId/bookings
+activate User                                     #D3D3D3
+activate BR                                       #98FB98
+BR -> AM: protect, authorize('user','admin')
+activate AM                                       #FF6347
+AM -> BC: addBooking
+activate BC                                       #FFD700
+
+BC -> CM: Car.findById(carId)
+activate CM                                       #87CEEB
+CM --> DB: Query car by id
+activate DB                                       #FFDEAD
+DB --> CM: car/null
+deactivate DB
+CM --> BC: car/null
+deactivate CM
+
+BC -> BM: Booking.find({ user: req.user.id })
+activate BM                                       #87CEEB
+BM --> DB: Query user's bookings
+activate DB                                       #FFDEAD
+DB --> BM: bookings[]
+deactivate DB
+BM --> BC: bookings[]
+deactivate BM
+
+BC -> BM: Booking.create({ user, car, provider, ... })
+activate BM                                       #87CEEB
+BM --> DB: INSERT booking
+activate DB                                       #FFDEAD
+DB --> BM: new booking
+deactivate DB
+BM --> BC: new booking
+deactivate BM
+
+BC -> CM: car.available=false; car.save()
+activate CM                                       #87CEEB
+CM --> DB: UPDATE car availability
+activate DB                                       #FFDEAD
+DB --> CM: ok
+deactivate DB
+CM --> BC: ok
+deactivate CM
+
+BC -> User: 201 Created / 400 Business rule error
+deactivate BC
+deactivate AM
+deactivate BR
+deactivate User
+
+@enduml

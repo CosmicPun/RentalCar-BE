@@ -1,0 +1,43 @@
+@startuml seq_update
+
+skinparam {
+    defaultFontName Source Code Pro
+    defaultFontSize 18
+    shadowing false
+    componentStyle uml2
+    MinClassWidth 150
+    ParticipantPadding 60
+    ArrowThickness 1.5
+}
+
+actor "**User**" as User
+participant "**Auth Router**" as AR          #98FB98
+participant "**Auth Middleware**" as AM      #FF6347
+participant "**Auth Controller**" as AC      #FFD700
+participant "**User Model**" as UM           #87CEEB
+database "**MongoDB**" as DB                 #FFDEAD
+
+== Update profile ==
+
+User -> AR: PUT /api/auth/update (Bearer token)
+activate User                                #D3D3D3
+activate AR                                  #98FB98
+AR -> AM: protect (verify JWT)
+activate AM                                  #FF6347
+AM -> AC: update
+activate AC                                  #FFD700
+AC -> UM: User.findByIdAndUpdate(req.user._id, updateData)
+activate UM                                  #87CEEB
+UM --> DB: UPDATE user fields (name/email/telephone)
+activate DB                                  #FFDEAD
+DB --> UM: updated user / null
+deactivate DB
+UM --> AC: updated user / null
+deactivate UM
+AC -> User: 200 OK / 404 Not Found
+deactivate AC
+deactivate AM
+deactivate AR
+deactivate User
+
+@enduml

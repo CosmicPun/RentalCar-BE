@@ -1,0 +1,39 @@
+@startuml seq_getProviders
+
+skinparam {
+    defaultFontName Source Code Pro
+    defaultFontSize 18
+    shadowing false
+    componentStyle uml2
+    MinClassWidth 150
+    ParticipantPadding 80
+    ArrowThickness 1.5
+}
+
+actor "**User**" as User
+participant "**Providers Router**" as PR          #98FB98
+participant "**Providers Controller**" as PC      #FFD700
+participant "**Provider Model**" as PM            #87CEEB
+database "**MongoDB**" as DB                      #FFDEAD
+
+== Get all providers ==
+
+User -> PR: GET /api/providers
+activate User                                     #D3D3D3
+activate PR                                       #98FB98
+PR -> PC: getProviders
+activate PC                                       #FFD700
+PC -> PM: Provider.find(query).populate('bookings')
+activate PM                                       #87CEEB
+PM --> DB: Query providers (+virtual bookings)
+activate DB                                       #FFDEAD
+DB --> PM: providers
+deactivate DB
+PM --> PC: providers
+deactivate PM
+PC -> User: 200 OK
+deactivate PC
+deactivate PR
+deactivate User
+
+@enduml

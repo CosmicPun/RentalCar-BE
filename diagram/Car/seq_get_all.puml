@@ -1,0 +1,39 @@
+@startuml seq_getCars
+
+skinparam {
+    defaultFontName Source Code Pro
+    defaultFontSize 18
+    shadowing false
+    componentStyle uml2
+    MinClassWidth 150
+    ParticipantPadding 80
+    ArrowThickness 1.5
+}
+
+actor "**User**" as User
+participant "**Cars Router**" as CR               #98FB98
+participant "**Cars Controller**" as CC           #FFD700
+participant "**Car Model**" as CM                 #87CEEB
+database "**MongoDB**" as DB                      #FFDEAD
+
+== Get all cars ==
+
+User -> CR: GET /api/cars
+activate User                                     #D3D3D3
+activate CR                                       #98FB98
+CR -> CC: getCars
+activate CC                                       #FFD700
+CC -> CM: Car.find(query).populate(provider)
+activate CM                                       #87CEEB
+CM --> DB: Query cars (+provider)
+activate DB                                       #FFDEAD
+DB --> CM: cars
+deactivate DB
+CM --> CC: cars
+deactivate CM
+CC -> User: 200 OK
+deactivate CC
+deactivate CR
+deactivate User
+
+@enduml

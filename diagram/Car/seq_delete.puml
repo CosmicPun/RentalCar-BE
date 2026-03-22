@@ -1,0 +1,60 @@
+@startuml seq_deleteCar
+
+skinparam {
+    defaultFontName Source Code Pro
+    defaultFontSize 18
+    shadowing false
+    componentStyle uml2
+    MinClassWidth 150
+    ParticipantPadding 80
+    ArrowThickness 1.5
+}
+
+actor "**User**" as User
+participant "**Cars Router**" as CR               #98FB98
+participant "**Auth Middleware**" as AM           #FF6347
+participant "**Cars Controller**" as CC           #FFD700
+participant "**Car Model**" as CM                 #87CEEB
+participant "**Booking Model**" as BM             #87CEEB
+database "**MongoDB**" as DB                      #FFDEAD
+
+== Delete car (Admin only; cascade bookings) ==
+
+User -> CR: DELETE /api/cars/:id
+activate User                                     #D3D3D3
+activate CR                                       #98FB98
+CR -> AM: protect, authorize('admin')
+activate AM                                       #FF6347
+AM -> CC: deleteCar
+activate CC                                       #FFD700
+CC -> CM: Car.findById(id)
+activate CM                                       #87CEEB
+CM --> DB: Query car by id
+activate DB                                       #FFDEAD
+DB --> CM: car / null
+deactivate DB
+CM --> CC: car / null
+deactivate CM
+CC -> BM: Booking.deleteMany({ car: id })
+activate BM                                       #87CEEB
+BM --> DB: DELETE car bookings
+activate DB                                       #FFDEAD
+DB --> BM: ok
+deactivate DB
+BM --> CC: ok
+deactivate BM
+CC -> CM: car.deleteOne()
+activate CM                                       #87CEEB
+CM --> DB: DELETE car
+activate DB                                       #FFDEAD
+DB --> CM: ok
+deactivate DB
+CM --> CC: ok
+deactivate CM
+CC -> User: 200 OK / 404 Not Found
+deactivate CC
+deactivate AM
+deactivate CR
+deactivate User
+
+@enduml

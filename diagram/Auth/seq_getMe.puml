@@ -1,0 +1,43 @@
+@startuml seq_getMe
+
+skinparam {
+    defaultFontName Source Code Pro
+    defaultFontSize 18
+    shadowing false
+    componentStyle uml2
+    MinClassWidth 150
+    ParticipantPadding 60
+    ArrowThickness 1.5
+}
+
+actor "**User**" as User
+participant "**Auth Router**" as AR          #98FB98
+participant "**Auth Middleware**" as AM      #FF6347
+participant "**Auth Controller**" as AC      #FFD700
+participant "**User Model**" as UM           #87CEEB
+database "**MongoDB**" as DB                 #FFDEAD
+
+== Get current user ==
+
+User -> AR: GET /api/auth/me (Bearer token)
+activate User                                #D3D3D3
+activate AR                                  #98FB98
+AR -> AM: protect (verify JWT)
+activate AM                                  #FF6347
+AM -> AC: getMe
+activate AC                                  #FFD700
+AC -> UM: User.findById(req.user.id)
+activate UM                                  #87CEEB
+UM --> DB: Query user by id
+activate DB                                  #FFDEAD
+DB --> UM: user
+deactivate DB
+UM --> AC: user
+deactivate UM
+AC -> User: 200 OK (profile)
+deactivate AC
+deactivate AM
+deactivate AR
+deactivate User
+
+@enduml

@@ -1,0 +1,40 @@
+@startuml usecaseProvider_diagram
+
+left to right direction
+
+skinparam {
+    defaultFontName Source Code Pro
+    defaultFontSize 14
+    shadowing true
+    arrowColor #666666
+    actorBorderColor #666666
+    usecaseBorderColor #333333
+    rectangleBorderColor #333333
+    rectangleBackgroundColor #f0f0f0
+    componentStyle uml2
+    ArrowThickness 1.5
+}
+
+actor User as user
+
+rectangle "Provider Management" {
+    usecase "getProviders" as uc_getProviders
+    usecase "getProvider" as uc_getProvider
+    usecase "createProvider" as uc_createProvider
+    usecase "updateProvider" as uc_updateProvider
+    usecase "deleteProvider" as uc_deleteProvider
+}
+
+actor Admin as admin
+
+user -- uc_getProviders  #Blue
+user -- uc_getProvider    #Blue
+
+uc_getProviders    -- admin #Red
+uc_getProvider     -- admin #Red
+uc_createProvider  -- admin #Red
+uc_updateProvider  -- admin #Red
+uc_deleteProvider  -- admin #Red
+
+@enduml
+

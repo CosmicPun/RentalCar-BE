@@ -1,0 +1,43 @@
+@startuml seq_login
+
+skinparam {
+    defaultFontName Source Code Pro
+    defaultFontSize 18
+    shadowing false
+    componentStyle uml2
+    MinClassWidth 150
+    ParticipantPadding 60
+    ArrowThickness 1.5
+}
+
+actor "**User**" as User
+participant "**Auth Router**" as AR          #98FB98
+participant "**Auth Controller**" as AC      #FFD700
+participant "**User Model**" as UM           #87CEEB
+database "**MongoDB**" as DB                 #FFDEAD
+
+== Login user ==
+
+User -> AR: POST /api/auth/login
+activate User                                #D3D3D3
+activate AR                                  #98FB98
+AR -> AC: login
+activate AC                                  #FFD700
+AC -> UM: User.findOne({ email }).select(+password)
+activate UM                                  #87CEEB
+UM --> DB: Query user by email
+activate DB                                  #FFDEAD
+DB --> UM: user/null
+deactivate DB
+UM --> AC: user/null
+deactivate UM
+AC -> UM: user.matchPassword(password)
+activate UM                                  #87CEEB
+UM --> AC: true/false
+deactivate UM
+AC -> User: 200 OK (token) / 401 Unauthorized
+deactivate AC
+deactivate AR
+deactivate User
+
+@enduml

@@ -1,0 +1,60 @@
+@startuml seq_deleteProvider
+
+skinparam {
+    defaultFontName Source Code Pro
+    defaultFontSize 18
+    shadowing false
+    componentStyle uml2
+    MinClassWidth 150
+    ParticipantPadding 80
+    ArrowThickness 1.5
+}
+
+actor "**User**" as User
+participant "**Providers Router**" as PR          #98FB98
+participant "**Auth Middleware**" as AM           #FF6347
+participant "**Providers Controller**" as PC      #FFD700
+participant "**Provider Model**" as PM            #87CEEB
+participant "**Booking Model**" as BM             #87CEEB
+database "**MongoDB**" as DB                      #FFDEAD
+
+== Delete provider (Admin only; cascade bookings) ==
+
+User -> PR: DELETE /api/providers/:id
+activate User                                     #D3D3D3
+activate PR                                       #98FB98
+PR -> AM: protect, authorize('admin')
+activate AM                                       #FF6347
+AM -> PC: deleteProvider
+activate PC                                       #FFD700
+PC -> PM: Provider.findById(id)
+activate PM                                       #87CEEB
+PM --> DB: Query provider by id
+activate DB                                       #FFDEAD
+DB --> PM: provider / null
+deactivate DB
+PM --> PC: provider / null
+deactivate PM
+PC -> BM: Booking.deleteMany({ provider: id })
+activate BM                                       #87CEEB
+BM --> DB: DELETE provider bookings
+activate DB                                       #FFDEAD
+DB --> BM: ok
+deactivate DB
+BM --> PC: ok
+deactivate BM
+PC -> PM: provider.deleteOne()
+activate PM                                       #87CEEB
+PM --> DB: DELETE provider
+activate DB                                       #FFDEAD
+DB --> PM: ok
+deactivate DB
+PM --> PC: ok
+deactivate PM
+PC -> User: 200 OK / 404 Not Found
+deactivate PC
+deactivate AM
+deactivate PR
+deactivate User
+
+@enduml

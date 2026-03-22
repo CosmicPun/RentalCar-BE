@@ -1,0 +1,43 @@
+@startuml seq_createProvider
+
+skinparam {
+    defaultFontName Source Code Pro
+    defaultFontSize 18
+    shadowing false
+    componentStyle uml2
+    MinClassWidth 150
+    ParticipantPadding 80
+    ArrowThickness 1.5
+}
+
+actor "**User**" as User
+participant "**Providers Router**" as PR          #98FB98
+participant "**Auth Middleware**" as AM           #FF6347
+participant "**Providers Controller**" as PC      #FFD700
+participant "**Provider Model**" as PM            #87CEEB
+database "**MongoDB**" as DB                      #FFDEAD
+
+== Create provider (Admin only) ==
+
+User -> PR: POST /api/providers
+activate User                                     #D3D3D3
+activate PR                                       #98FB98
+PR -> AM: protect, authorize('admin')
+activate AM                                       #FF6347
+AM -> PC: createProvider
+activate PC                                       #FFD700
+PC -> PM: Provider.create(req.body)
+activate PM                                       #87CEEB
+PM --> DB: INSERT new provider
+activate DB                                       #FFDEAD
+DB --> PM: new provider
+deactivate DB
+PM --> PC: new provider
+deactivate PM
+PC -> User: 201 Created
+deactivate PC
+deactivate AM
+deactivate PR
+deactivate User
+
+@enduml

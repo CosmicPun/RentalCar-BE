@@ -1,0 +1,1467 @@
+{
+    "info": {
+        "name": "RentalCar Workflow Testing",
+        "description": "Premium Test Suite. Highlighting overlapping booking checks and user seat limits. Note: Using \"postman.setNextRequest\" is deprecated. Use \"pm.execution.setNextRequest()\" instead.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "🟢 Phase 1: Authentication & Security Baseline",
+            "item": [
+                {
+                    "name": "Login Admin",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Login successful\", () => pm.response.to.have.status(200));",
+                                    "pm.environment.set(\"TOKEN\", pm.response.json().token);",
+                                    "pm.execution.setNextRequest(\"Get Me Admin\");"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"admin@gmail.com\",\n  \"password\": \"12345678\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{URL}}/api/auth/login",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "login"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Me Admin",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Get Me successful\", () => pm.response.to.have.status(200));",
+                                    "pm.test(\"Role is admin\", () => pm.expect(pm.response.json().data.role).to.eql(\"admin\"));",
+                                    "pm.execution.setNextRequest(\"Logout\");"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{URL}}/api/auth/me",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "me"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Logout",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Logout successful\", () => pm.response.to.have.status(200));",
+                                    "pm.environment.set(\"TOKEN\", \"\");",
+                                    "pm.execution.setNextRequest(\"Get Me (After Logout - Should Fail)\");"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{URL}}/api/auth/logout",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "logout"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Me (After Logout - Should Fail)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Access denied after logout (401)\", () => pm.response.to.have.status(401));",
+                                    "pm.execution.setNextRequest(\"Login Admin (Fresh)\");"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{URL}}/api/auth/me",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "me"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "🟡 Phase 2: Data Seeding (Admin Privileges)",
+            "item": [
+                {
+                    "name": "Login Admin (Fresh)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Login successful\", () => pm.response.to.have.status(200));",
+                                    "pm.environment.set(\"TOKEN\", pm.response.json().token);",
+                                    "pm.execution.setNextRequest(\"Add Provider\");"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"admin@gmail.com\",\n  \"password\": \"12345678\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{URL}}/api/auth/login",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "login"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Add Provider",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Add Provider successful\", () => pm.response.to.have.status(201));",
+                                    "pm.environment.set(\"PROVIDER_ID\", pm.response.json().data._id);",
+                                    "pm.execution.setNextRequest(\"Check Provider Data\");"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Seed Provider 1\",\n  \"address\": \"A1\", \"district\": \"D1\", \"province\": \"P1\", \"postalcode\": \"10000\", \"tel\": \"01\", \"region\": \"R1\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{URL}}/api/providers",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "providers"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Check Provider Data",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Get Provider successful\", () => pm.response.to.have.status(200));",
+                                    "pm.test(\"Data matches\", () => {",
+                                    "    const data = pm.response.json().data;",
+                                    "    pm.expect(data.name).to.eql(\"Seed Provider 1\");",
+                                    "});",
+                                    "pm.execution.setNextRequest(\"Get All Providers (Populated)\");"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{URL}}/api/providers/{{PROVIDER_ID}}",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "providers",
+                                "{{PROVIDER_ID}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get All Providers (Populated)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Get All Providers successful\", () => pm.response.to.have.status(200));",
+                                    "pm.test(\"Bookings are populated\", () => {",
+                                    "    const providers = pm.response.json().data;",
+                                    "    pm.expect(providers[0]).to.have.property(\"bookings\");",
+                                    "});",
+                                    "pm.execution.setNextRequest(\"Add Car 1\");"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{URL}}/api/providers",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "providers"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Add Car 1",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Add Car 1 successful\", () => pm.response.to.have.status(201));",
+                                    "pm.environment.set(\"CAR_ID_1\", pm.response.json().data._id);",
+                                    "pm.execution.setNextRequest(\"Check Car 1 Data\");"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"licensePlate\": \"PLATE-1\", \"brand\": \"BMW\", \"model\": \"X5\", \"year\": 2023, \"color\": \"Black\", \"transmission\": \"Automatic\", \"rentPrice\": 5000, \"provider\": \"{{PROVIDER_ID}}\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{URL}}/api/cars",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "cars"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Check Car 1 Data",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Get Car 1 successful\", () => pm.response.to.have.status(200));",
+                                    "pm.test(\"Data matches\", () => {",
+                                    "    const data = pm.response.json().data;",
+                                    "    pm.expect(data.licensePlate).to.eql(\"PLATE-1\");",
+                                    "    pm.expect(data.brand).to.eql(\"BMW\");",
+                                    "});",
+                                    "pm.execution.setNextRequest(\"Add Car 2\");"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{URL}}/api/cars/{{CAR_ID_1}}",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "cars",
+                                "{{CAR_ID_1}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Add Car 2",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Add Car 2 successful\", () => pm.response.to.have.status(201));",
+                                    "pm.environment.set(\"CAR_ID_2\", pm.response.json().data._id);",
+                                    "pm.execution.setNextRequest(\"Add Car 3\");"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"licensePlate\": \"PLATE-2\", \"brand\": \"Audi\", \"model\": \"A6\", \"year\": 2023, \"color\": \"Silver\", \"transmission\": \"Automatic\", \"rentPrice\": 4500, \"provider\": \"{{PROVIDER_ID}}\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{URL}}/api/cars",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "cars"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Add Car 3",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Add Car 3 successful\", () => pm.response.to.have.status(201));",
+                                    "pm.environment.set(\"CAR_ID_3\", pm.response.json().data._id);",
+                                    "pm.execution.setNextRequest(\"Add Car 4\");"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"licensePlate\": \"PLATE-3\", \"brand\": \"Toyota\", \"model\": \"Camry\", \"year\": 2023, \"color\": \"White\", \"transmission\": \"Automatic\", \"rentPrice\": 1500, \"provider\": \"{{PROVIDER_ID}}\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{URL}}/api/cars",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "cars"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Add Car 4",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Add Car 4 successful\", () => pm.response.to.have.status(201));",
+                                    "pm.environment.set(\"CAR_ID_4\", pm.response.json().data._id);",
+                                    "pm.execution.setNextRequest(\"Add Car 5\");"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"licensePlate\": \"PLATE-4\", \"brand\": \"Honda\", \"model\": \"Civic\", \"year\": 2023, \"color\": \"Red\", \"transmission\": \"Automatic\", \"rentPrice\": 1200, \"provider\": \"{{PROVIDER_ID}}\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{URL}}/api/cars",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "cars"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Add Car 5",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Add Car 5 successful\", () => pm.response.to.have.status(201));",
+                                    "pm.environment.set(\"CAR_ID_5\", pm.response.json().data._id);",
+                                    "pm.execution.setNextRequest(\"Get All Cars (Populated)\");"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"licensePlate\": \"PLATE-5\", \"brand\": \"Nissan\", \"model\": \"GTR\", \"year\": 2023, \"color\": \"Midnight Purple\", \"transmission\": \"Automatic\", \"rentPrice\": 6000, \"provider\": \"{{PROVIDER_ID}}\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{URL}}/api/cars",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "cars"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get All Cars (Populated)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Get All Cars successful\", () => pm.response.to.have.status(200));",
+                                    "pm.test(\"Provider is populated\", () => {",
+                                    "    const cars = pm.response.json().data;",
+                                    "    pm.expect(cars[0].provider).to.have.property(\"name\");",
+                                    "});",
+                                    "pm.execution.setNextRequest(\"Admin Booking (Only 1)\");"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{URL}}/api/cars",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "cars"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Admin Booking (Only 1)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Admin booked success\", () => pm.response.to.have.status(201));",
+                                    "pm.execution.setNextRequest(\"Get All Bookings (Admin - Populated)\");"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"bookingDate\": \"2024-11-01\",\n  \"returnDate\": \"2024-11-03\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{URL}}/api/cars/{{CAR_ID_1}}/bookings",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "cars",
+                                "{{CAR_ID_1}}",
+                                "bookings"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get All Bookings (Admin - Populated)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Get All Bookings successful\", () => pm.response.to.have.status(200));",
+                                    "pm.test(\"Car and Provider are populated\", () => {",
+                                    "    const bookings = pm.response.json().data;",
+                                    "    pm.expect(bookings[0].car).to.have.property(\"brand\");",
+                                    "    pm.expect(bookings[0].car.provider).to.have.property(\"name\");",
+                                    "});",
+                                    "pm.execution.setNextRequest(\"Register User\");"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{URL}}/api/bookings",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "bookings"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "🔴 Phase 3: User Perspective & Boundary Testing",
+            "item": [
+                {
+                    "name": "Register User",
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "exec": [
+                                    "const rnd = Math.floor(Math.random() * 999999);\npm.globals.set(\"RANDOM_USER_EMAIL\", `user${rnd}@gmail.com`);"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        },
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Register successful\", () => pm.response.to.have.status(201));",
+                                    "pm.execution.setNextRequest(\"Login User\");"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"{{RANDOM_USER_EMAIL}}\",\n  \"telephone\": \"0888888888\",\n  \"password\": \"12345678\",\n  \"role\": \"user\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{URL}}/api/auth/register",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "register"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Login User",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Login successful\", () => pm.response.to.have.status(200));",
+                                    "pm.environment.set(\"TOKEN\", pm.response.json().token);",
+                                    "pm.execution.setNextRequest(\"User Unauthorized Access: Add Provider\");"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"{{RANDOM_USER_EMAIL}}\",\n  \"password\": \"12345678\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{URL}}/api/auth/login",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "login"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "User Unauthorized Access: Add Provider",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Access denied for user role (403)\", () => pm.response.to.have.status(403));",
+                                    "pm.execution.setNextRequest(\"User: Booking 1 (Success)\");"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Unauthorized Provider\",\n  \"address\": \"A1\", \"district\": \"D1\", \"province\": \"P1\", \"postalcode\": \"10000\", \"tel\": \"01\", \"region\": \"R1\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{URL}}/api/providers",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "providers"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "User: Booking 1 (Success)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Booking 1 success\", () => pm.response.to.have.status(201));",
+                                    "pm.environment.set(\"BOOKING_ID_1\", pm.response.json().data._id);",
+                                    "pm.execution.setNextRequest(\"Get All Bookings (User Perspective - Populated)\");"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"bookingDate\": \"2025-01-01\", \"returnDate\": \"2025-01-05\"}"
+                        },
+                        "url": {
+                            "raw": "{{URL}}/api/cars/{{CAR_ID_2}}/bookings",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "cars",
+                                "{{CAR_ID_2}}",
+                                "bookings"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get All Bookings (User Perspective - Populated)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Get My Bookings successful\", () => pm.response.to.have.status(200));",
+                                    "pm.test(\"User only sees their bookings\", () => {",
+                                    "    const bookings = pm.response.json().data;",
+                                    "    pm.expect(bookings.length).to.be.at.least(1);",
+                                    "    // Assuming other users had bookings too, we only see ours",
+                                    "});",
+                                    "pm.test(\"Car and Provider are populated\", () => {",
+                                    "    const bookings = pm.response.json().data;",
+                                    "    pm.expect(bookings[0].car).to.have.property(\"brand\");",
+                                    "    pm.expect(bookings[0].car.provider).to.have.property(\"name\");",
+                                    "});",
+                                    "pm.execution.setNextRequest(\"User: Booking 2 (Success)\");"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{URL}}/api/bookings",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "bookings"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "User: Booking 2 (Success)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Booking 2 success\", () => pm.response.to.have.status(201));",
+                                    "pm.execution.setNextRequest(\"User: Booking 3 (Success)\");"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"bookingDate\": \"2025-02-01\", \"returnDate\": \"2025-02-05\"}"
+                        },
+                        "url": {
+                            "raw": "{{URL}}/api/cars/{{CAR_ID_3}}/bookings",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "cars",
+                                "{{CAR_ID_3}}",
+                                "bookings"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "User: Booking 3 (Success)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Booking 3 success\", () => pm.response.to.have.status(201));",
+                                    "pm.execution.setNextRequest(\"User: Booking 4 (Fail - Limit 3 Reached)\");"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"bookingDate\": \"2025-03-01\", \"returnDate\": \"2025-03-05\"}"
+                        },
+                        "url": {
+                            "raw": "{{URL}}/api/cars/{{CAR_ID_4}}/bookings",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "cars",
+                                "{{CAR_ID_4}}",
+                                "bookings"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "User: Booking 4 (Fail - Limit 3 Reached)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Limit rejected (400)\", () => pm.response.to.have.status(400));",
+                                    "pm.test(\"Message correct\", () => pm.expect(pm.response.json().message).to.include(\"already 3 bookings\"));",
+                                    "pm.execution.setNextRequest(\"User: Delete Booking 1 (To Free Up Space)\");"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"bookingDate\": \"2025-04-01\", \"returnDate\": \"2025-04-05\"}"
+                        },
+                        "url": {
+                            "raw": "{{URL}}/api/cars/{{CAR_ID_5}}/bookings",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "cars",
+                                "{{CAR_ID_5}}",
+                                "bookings"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "User: Delete Booking 1 (To Free Up Space)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Delete success\", () => pm.response.to.have.status(200));",
+                                    "pm.execution.setNextRequest(\"User: Booking 4 (Success After Deletion)\");"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "url": {
+                            "raw": "{{URL}}/api/bookings/{{BOOKING_ID_1}}",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "bookings",
+                                "{{BOOKING_ID_1}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "User: Booking 4 (Success After Deletion)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Booking 4 now success\", () => pm.response.to.have.status(201));",
+                                    "pm.execution.setNextRequest(\"Login Admin (Cleanup)\");"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"bookingDate\": \"2025-05-01\", \"returnDate\": \"2025-05-05\"}"
+                        },
+                        "url": {
+                            "raw": "{{URL}}/api/cars/{{CAR_ID_5}}/bookings",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "cars",
+                                "{{CAR_ID_5}}",
+                                "bookings"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "🟣 Phase 4: Cascade Delete Validation",
+            "item": [
+                {
+                    "name": "Login Admin (Cleanup)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Login successful\", () => pm.response.to.have.status(200));",
+                                    "pm.environment.set(\"TOKEN\", pm.response.json().token);",
+                                    "pm.execution.setNextRequest(\"Delete Provider (Triggers Cascade)\");"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"admin@gmail.com\",\n  \"password\": \"12345678\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{URL}}/api/auth/login",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "login"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Provider (Triggers Cascade)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Delete Provider successful\", () => pm.response.to.have.status(200));",
+                                    "pm.execution.setNextRequest(\"Verify Bookings are Deleted (Cascade Check)\");"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "url": {
+                            "raw": "{{URL}}/api/providers/{{PROVIDER_ID}}",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "providers",
+                                "{{PROVIDER_ID}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Verify Bookings are Deleted (Cascade Check)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                                    "pm.test(\"All bookings for this provider are gone\", () => {",
+                                    "    pm.expect(pm.response.json().count).to.eql(0);",
+                                    "});",
+                                    "pm.execution.setNextRequest(\"Verify Cars are Deleted (Cascade Check)\");"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{URL}}/api/bookings",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "bookings"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Verify Cars are Deleted (Cascade Check)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                                    "pm.test(\"All cars for this provider are gone\", () => {",
+                                    "    pm.expect(pm.response.json().count).to.eql(0);",
+                                    "});",
+                                    "pm.execution.setNextRequest(\"Check Specific Booking ID (Should be 404)\");"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{URL}}/api/cars",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "cars"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Check Specific Booking ID (Should be 404)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Individual booking record is missing\", () => {",
+                                    "    pm.response.to.have.status(404);",
+                                    "});",
+                                    "pm.execution.setNextRequest(null);"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{URL}}/api/bookings/{{BOOKING_ID_1}}",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "bookings",
+                                "{{BOOKING_ID_1}}"
+                            ]
+                        }
+                    }
+                }
+            ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "URL",
+            "value": "http://localhost:5000"
+        },
+        {
+            "key": "TOKEN",
+            "value": ""
+        },
+        {
+            "key": "PROVIDER_ID",
+            "value": ""
+        },
+        {
+            "key": "CAR_ID_1",
+            "value": ""
+        },
+        {
+            "key": "CAR_ID_2",
+            "value": ""
+        },
+        {
+            "key": "CAR_ID_3",
+            "value": ""
+        },
+        {
+            "key": "CAR_ID_4",
+            "value": ""
+        },
+        {
+            "key": "CAR_ID_5",
+            "value": ""
+        }
+    ]
+}

@@ -1,0 +1,43 @@
+@startuml usecaseAuth_diagram
+
+left to right direction
+
+skinparam {
+    defaultFontName Source Code Pro
+    defaultFontSize 14
+    shadowing true
+    arrowColor #666666
+    actorBorderColor #666666
+    usecaseBorderColor #333333
+    rectangleBorderColor #333333
+    rectangleBackgroundColor #f0f0f0
+    componentStyle uml2
+    ArrowThickness 1.5
+}
+
+actor User as user
+
+rectangle "Authentication" {
+    usecase "register" as uc_register
+    usecase "login" as uc_login
+    usecase "logout" as uc_logout
+    usecase "getMe" as uc_me
+    usecase "update" as uc_update
+}
+
+actor Admin as admin
+
+user -- uc_register  #Blue
+user -- uc_login     #Blue
+user -- uc_logout    #Blue
+user -- uc_me        #Blue
+user -- uc_update    #Blue
+
+uc_register -- admin #Red
+uc_login    -- admin #Red
+uc_logout   -- admin #Red
+uc_me       -- admin #Red
+uc_update   -- admin #Red
+
+@enduml
+

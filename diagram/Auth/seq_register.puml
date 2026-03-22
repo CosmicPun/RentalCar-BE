@@ -1,0 +1,47 @@
+@startuml seq_register
+
+skinparam {
+    defaultFontName Source Code Pro
+    defaultFontSize 18
+    shadowing false
+    componentStyle uml2
+    MinClassWidth 150
+    ParticipantPadding 60
+    ArrowThickness 1.5
+}
+
+actor "**User**" as User
+participant "**Auth Router**" as AR          #98FB98
+participant "**Auth Controller**" as AC      #FFD700
+participant "**User Model**" as UM           #87CEEB
+database "**MongoDB**" as DB                 #FFDEAD
+
+== Register new user ==
+
+User -> AR: POST /api/auth/register
+activate User                                #D3D3D3
+activate AR                                  #98FB98
+AR -> AC: register
+activate AC                                  #FFD700
+AC -> UM: User.findOne({ email })
+activate UM                                  #87CEEB
+UM --> DB: Query user by email
+activate DB                                  #FFDEAD
+DB --> UM: user/null
+deactivate DB
+UM --> AC: user/null
+deactivate UM
+AC -> UM: User.create(req.body)
+activate UM                                  #87CEEB
+UM --> DB: INSERT new user (hashed password)
+activate DB                                  #FFDEAD
+DB --> UM: new user
+deactivate DB
+UM --> AC: new user
+deactivate UM
+AC -> User: 201 Created (token)
+deactivate AC
+deactivate AR
+deactivate User
+
+@enduml

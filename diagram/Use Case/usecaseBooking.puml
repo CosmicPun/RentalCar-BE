@@ -1,0 +1,43 @@
+@startuml usecaseBooking_diagram
+
+left to right direction
+
+skinparam {
+    defaultFontName Source Code Pro
+    defaultFontSize 14
+    shadowing true
+    arrowColor #666666
+    actorBorderColor #666666
+    usecaseBorderColor #333333
+    rectangleBorderColor #333333
+    rectangleBackgroundColor #f0f0f0
+    componentStyle uml2
+    ArrowThickness 1.5
+}
+
+actor User as user
+
+rectangle "Booking Management" {
+    usecase "addBooking(max 3 per day)" as uc_addBooking
+    usecase "getBooking" as uc_getBooking
+    usecase "getBookings" as uc_getBookings
+    usecase "updateBooking" as uc_updateBooking
+    usecase "deleteBooking" as uc_deleteBooking
+}
+
+actor Admin as admin
+
+user -- uc_addBooking    #Blue
+user -- uc_getBooking    #Blue : "own" 
+user -- uc_getBookings   #Blue : "own" 
+user -- uc_updateBooking #Blue : "own" 
+user -- uc_deleteBooking #Blue : "own" 
+
+uc_addBooking   -- admin #Red
+uc_getBooking    -- admin #Red : "all" 
+uc_getBookings   -- admin #Red : "all" 
+uc_updateBooking -- admin #Red : "all" 
+uc_deleteBooking -- admin #Red : "all" 
+
+@enduml
+
