@@ -46,7 +46,7 @@ exports.getBookings = async (req, res, next) => {
                     path: 'provider',
                     select: 'name address tel'
                 }
-            });
+            }).populate('user', 'name email');
         }
     }
 

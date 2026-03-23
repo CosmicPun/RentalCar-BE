@@ -19,8 +19,8 @@ exports.getCars = async (req, res, next) => {
     let queryStr = JSON.stringify(reqQuery);
     queryStr = queryStr.replace(/\b(gt|gte|lt|lte|in)\b/g, match => `$${match}`);
 
-    // Finding resource & Populate bookings and provider
-    query = Car.find(JSON.parse(queryStr)).populate('bookings').populate({
+    // Finding resource & Populate provider
+    query = Car.find(JSON.parse(queryStr)).populate({
         path: 'provider',
         select: 'name address tel'
     });
@@ -78,7 +78,7 @@ exports.getCars = async (req, res, next) => {
 // @access  Public
 exports.getCar = async (req, res, next) => {
     try {
-        const car = await Car.findById(req.params.id).populate('bookings').populate({
+        const car = await Car.findById(req.params.id).populate({
             path: 'provider',
             select: 'name address tel'
         });

@@ -32,14 +32,18 @@ const providerSchema = new mongoose.Schema({
     region: {
         type: String,
         required: [true, 'Please add a region']
+    },
+    picture: {
+        type: String,
+        default: 'https://drive.google.com/uc?id=1nZWobxFQRixmV67P08ohYf9-FzR8oi1-'
     }
 }, {
     toJSON: { virtuals: true },
     toObject: { virtuals: true }
 });
 
-providerSchema.virtual('bookings', {
-    ref: 'Booking',
+providerSchema.virtual('cars', {
+    ref: 'Car',
     localField: '_id',
     foreignField: 'provider',
     justOne: false

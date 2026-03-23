@@ -50,6 +50,10 @@ const carSchema = new mongoose.Schema({
         ref: 'Provider',
         required: true,
     },
+    picture: {
+        type: String,
+        default: 'https://drive.google.com/uc?id=1Sw17oditCfc1Nz3-k5WNi0w-GAtzQrsw'
+    },
     rentPrice: {
         type: Number,
         required: [true, 'Please add a rental price per day']
@@ -58,14 +62,6 @@ const carSchema = new mongoose.Schema({
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
     timestamps: true
-});
-
-// Virtual populate to see all bookings for this specific car
-carSchema.virtual('bookings', {
-    ref: 'Booking',
-    localField: '_id',
-    foreignField: 'car',
-    justOne: false
 });
 
 module.exports = mongoose.model('Car', carSchema);

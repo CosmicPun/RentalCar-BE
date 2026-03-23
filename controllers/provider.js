@@ -19,8 +19,8 @@ exports.getProviders = async (req, res, next) => {
     let queryStr = JSON.stringify(reqQuery);
     queryStr = queryStr.replace(/\b(gt|gte|lt|lte|in)\b/g, match => `$${match}`);
 
-    // Finding resource & Populate bookings (from Virtual)
-    query = Provider.find(JSON.parse(queryStr)).populate('bookings');
+    // Finding resource & Populate cars (from Virtual)
+    query = Provider.find(JSON.parse(queryStr)).populate('cars');
 
     // Select Fields
     if (req.query.select) {
@@ -75,8 +75,8 @@ exports.getProviders = async (req, res, next) => {
 // @access  Public
 exports.getProvider = async (req, res, next) => {
     try {
-        // Populate 'bookings' using the virtual field defined in Model
-        const provider = await Provider.findById(req.params.id).populate('bookings');
+        // Populate 'cars' using the virtual field defined in Model
+        const provider = await Provider.findById(req.params.id).populate('cars');
 
         if (!provider) {
             return res.status(404).json({
