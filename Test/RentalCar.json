@@ -648,6 +648,47 @@
           }
         }
       ]
+    },
+    {
+      "name": "05. Reviews",
+      "item": [
+        {
+          "name": "Create Review",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bookingId\": \"{{BOOKING_ID}}\",\n  \"rating\": 5,\n  \"comment\": \"Excellent experience with this provider!\"\n}"
+            },
+            "url": {
+              "raw": "{{URL}}/api/reviews",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "reviews"
+              ]
+            }
+          }
+        }
+      ]
     }
   ],
   "variable": [

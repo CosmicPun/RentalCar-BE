@@ -1178,7 +1178,8 @@
                             "script": {
                                 "exec": [
                                     "pm.test(\"Booking 4 now success\", () => pm.response.to.have.status(201));",
-                                    "pm.execution.setNextRequest(\"Login Admin (Cleanup)\");"
+                                    "pm.environment.set(\"BOOKING_ID_FOR_REVIEW\", pm.response.json().data._id);",
+                                    "pm.execution.setNextRequest(\"🔵 Phase 4: Additional Requirement\");"
                                 ],
                                 "type": "text/javascript"
                             }
@@ -1223,7 +1224,113 @@
             ]
         },
         {
-            "name": "🟣 Phase 4: Cascade Delete Validation",
+            "name": "🔵 Phase 4: Additional Requirement",
+            "item": [
+                {
+                    "name": "Create Review",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Review created successfully\", () => pm.response.to.have.status(201));",
+                                    "pm.test(\"Review data is correct\", () => {",
+                                    "    const data = pm.response.json().data;",
+                                    "    pm.expect(data.bookingId).to.eql(pm.environment.get(\"BOOKING_ID_FOR_REVIEW\"));",
+                                    "    pm.expect(data.rating).to.eql(5);",
+                                    "});",
+                                    "pm.execution.setNextRequest(\"Create Duplicate Review (Should Fail)\");"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"bookingId\": \"{{BOOKING_ID_FOR_REVIEW}}\",\n  \"rating\": 5,\n  \"comment\": \"Amazing service!\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{URL}}/api/reviews",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "reviews"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Duplicate Review (Should Fail)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Review duplication fails\", () => pm.response.to.have.status(400));",
+                                    "pm.execution.setNextRequest(\"Login Admin (Cleanup)\");"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"bookingId\": \"{{BOOKING_ID_FOR_REVIEW}}\",\n  \"rating\": 1,\n  \"comment\": \"I shouldn't be able to review twice!\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{URL}}/api/reviews",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "reviews"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "🟣 Phase 5: Cascade Delete Validation",
             "item": [
                 {
                     "name": "Login Admin (Cleanup)",
@@ -1461,6 +1568,10 @@
         },
         {
             "key": "CAR_ID_5",
+            "value": ""
+        },
+        {
+            "key": "BOOKING_ID_FOR_REVIEW",
             "value": ""
         }
     ]
