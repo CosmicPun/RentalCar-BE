@@ -257,3 +257,48 @@ exports.deleteBooking = async (req, res, next) => {
         next(err);
     }
 };
+
+// @desc    Complete booking
+// @route   PUT /api/v1/bookings/:id/complete
+// @access  Private
+exports.completeBooking = async (req, res, next) => {
+    try {
+        const booking = await Booking.findById(req.params.id);
+
+        if (!booking) {
+            return res.status(404).json({
+                success: false,
+                message: `No booking with the id of ${req.params.id}`
+            });
+        }
+
+        // Make sure user is booking owner or admin
+        if (booking.user.toString() !== req.user.id && req.user.role !== 'admin') {
+            return res.status(401).json({
+                success: false,
+                message: `User ${req.user.id} is not authorized to complete this booking`
+            });
+        }
+
+        if (booking.status === 'complete') {
+            return res.status(400).json({
+                success: false,
+                message: 'Booking is already completed'
+            });
+        }
+
+        // Update booking status
+        booking.status = 'complete';
+        await booking.save();
+
+        // Mark car as available
+        await Car.findByIdAndUpdate(booking.car, { available: true });
+
+        res.status(200).json({
+            success: true,
+            data: booking
+        });
+    } catch (err) {
+        next(err);
+    }
+};

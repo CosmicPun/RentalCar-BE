@@ -28,6 +28,11 @@ const BookingSchema = new mongoose.Schema({
         ref: 'Provider',
         required: true
     },
+    status: {
+        type: String,
+        enum: ['pending', 'complete'],
+        default: 'pending'
+    },
     createdAt: {
         type: Date,
         default: Date.now
