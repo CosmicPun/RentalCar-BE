@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Review = require('../models/Review');
 const Booking = require('../models/Booking');
 
@@ -47,5 +48,79 @@ exports.addReview = async (req, res, next) => {
         });
     } catch (err) {
         next(err);
+    }
+};
+
+// @desc    Update review
+// @route   PUT /api/v1/reviews/:reviewId
+// @access  Private
+exports.updateReview = async (req, res, next) => {
+    try {
+        const { reviewId } = req.params;
+        const allowedFields = ['rating', 'comment'];
+        const requestFields = Object.keys(req.body);
+        const invalidFields = requestFields.filter((field) => !allowedFields.includes(field));
+
+        if (!mongoose.Types.ObjectId.isValid(reviewId)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid review id'
+            });
+        }
+
+        if (requestFields.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Please provide at least one field to update'
+            });
+        }
+
+        if (invalidFields.length > 0) {
+            return res.status(400).json({
+                success: false,
+                message: `Invalid fields in update request: ${invalidFields.join(', ')}`
+            });
+        }
+
+        const review = await Review.findById(reviewId);
+
+        if (!review) {
+            return res.status(404).json({
+                success: false,
+                message: `No review with the id of ${reviewId}`
+            });
+        }
+
+        if (review.userId.toString() !== req.user.id) {
+            return res.status(403).json({
+                success: false,
+                message: `User ${req.user.id} is not authorized to update this review`
+            });
+        }
+
+        allowedFields.forEach((field) => {
+            if (Object.prototype.hasOwnProperty.call(req.body, field)) {
+                review[field] = req.body[field];
+            }
+        });
+
+        await review.save();
+
+        res.status(200).json({
+            success: true,
+            data: review
+        });
+    } catch (err) {
+        if (err.name === 'ValidationError' || err.name === 'CastError') {
+            return res.status(400).json({
+                success: false,
+                message: err.message
+            });
+        }
+
+        return res.status(500).json({
+            success: false,
+            message: 'Server Error'
+        });
     }
 };

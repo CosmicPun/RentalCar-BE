@@ -687,6 +687,43 @@
               ]
             }
           }
+        },
+        {
+          "name": "Update Review",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rating\": 4,\n  \"comment\": \"Updated review comment\"\n}"
+            },
+            "url": {
+              "raw": "{{URL}}/api/reviews/{{REVIEW_ID}}",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "reviews",
+                "{{REVIEW_ID}}"
+              ]
+            }
+          }
         }
       ]
     }
@@ -710,6 +747,10 @@
     },
     {
       "key": "BOOKING_ID",
+      "value": ""
+    },
+    {
+      "key": "REVIEW_ID",
       "value": ""
     }
   ]

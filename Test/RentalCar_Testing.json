@@ -1236,10 +1236,11 @@
                                     "pm.test(\"Review created successfully\", () => pm.response.to.have.status(201));",
                                     "pm.test(\"Review data is correct\", () => {",
                                     "    const data = pm.response.json().data;",
+                                    "    pm.environment.set(\"REVIEW_ID_FOR_UPDATE\", data._id);",
                                     "    pm.expect(data.bookingId).to.eql(pm.environment.get(\"BOOKING_ID_FOR_REVIEW\"));",
                                     "    pm.expect(data.rating).to.eql(5);",
                                     "});",
-                                    "pm.execution.setNextRequest(\"Create Duplicate Review (Should Fail)\");"
+                                    "pm.execution.setNextRequest(\"Update Review\");"
                                 ],
                                 "type": "text/javascript"
                             }
@@ -1275,6 +1276,61 @@
                             "path": [
                                 "api",
                                 "reviews"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Review",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Review updated successfully\", () => pm.response.to.have.status(200));",
+                                    "pm.test(\"Updated review data is correct\", () => {",
+                                    "    const data = pm.response.json().data;",
+                                    "    pm.expect(data._id).to.eql(pm.environment.get(\"REVIEW_ID_FOR_UPDATE\"));",
+                                    "    pm.expect(data.rating).to.eql(4);",
+                                    "    pm.expect(data.comment).to.eql(\"Updated review comment\");",
+                                    "});",
+                                    "pm.execution.setNextRequest(\"Create Duplicate Review (Should Fail)\");"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"rating\": 4,\n  \"comment\": \"Updated review comment\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{URL}}/api/reviews/{{REVIEW_ID_FOR_UPDATE}}",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "reviews",
+                                "{{REVIEW_ID_FOR_UPDATE}}"
                             ]
                         }
                     }
