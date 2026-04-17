@@ -724,6 +724,33 @@
               ]
             }
           }
+        },
+        {
+          "name": "Get My Reviews",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{URL}}/api/reviews/me",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "reviews",
+                "me"
+              ]
+            }
+          }
         }
       ]
     }

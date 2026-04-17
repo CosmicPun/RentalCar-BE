@@ -302,9 +302,9 @@
                             "script": {
                                 "exec": [
                                     "pm.test(\"Get All Providers successful\", () => pm.response.to.have.status(200));",
-                                    "pm.test(\"Bookings are populated\", () => {",
+                                    "pm.test(\"Cars are populated\", () => {",
                                     "    const providers = pm.response.json().data;",
-                                    "    pm.expect(providers[0]).to.have.property(\"bookings\");",
+                                    "    pm.expect(providers[0]).to.have.property(\"cars\");",
                                     "});",
                                     "pm.execution.setNextRequest(\"Add Car 1\");"
                                 ],
@@ -1294,7 +1294,7 @@
                                     "    pm.expect(data.rating).to.eql(4);",
                                     "    pm.expect(data.comment).to.eql(\"Updated review comment\");",
                                     "});",
-                                    "pm.execution.setNextRequest(\"Create Duplicate Review (Should Fail)\");"
+                                    "pm.execution.setNextRequest(\"Get My Reviews\");"
                                 ],
                                 "type": "text/javascript"
                             }
@@ -1331,6 +1331,54 @@
                                 "api",
                                 "reviews",
                                 "{{REVIEW_ID_FOR_UPDATE}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get My Reviews",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Get my reviews succeeds\", () => pm.response.to.have.status(200));",
+                                    "pm.test(\"Get my reviews returns the authenticated user's reviews\", () => {",
+                                    "    const body = pm.response.json();",
+                                    "    pm.expect(body.success).to.eql(true);",
+                                    "    pm.expect(body.count).to.be.at.least(1);",
+                                    "    pm.expect(body.data.some((review) => review._id === pm.environment.get(\"REVIEW_ID_FOR_UPDATE\"))).to.eql(true);",
+                                    "    for (let i = 1; i < body.data.length; i += 1) {",
+                                    "        pm.expect(new Date(body.data[i - 1].createdAt).getTime()).to.be.at.least(new Date(body.data[i].createdAt).getTime());",
+                                    "    }",
+                                    "});",
+                                    "pm.execution.setNextRequest(\"Create Duplicate Review (Should Fail)\");"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{TOKEN}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{URL}}/api/reviews/me",
+                            "host": [
+                                "{{URL}}"
+                            ],
+                            "path": [
+                                "api",
+                                "reviews",
+                                "me"
                             ]
                         }
                     }

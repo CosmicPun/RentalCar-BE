@@ -51,6 +51,26 @@ exports.addReview = async (req, res, next) => {
     }
 };
 
+// @desc    Get reviews for current user
+// @route   GET /api/v1/reviews/me
+// @access  Private
+exports.getMyReviews = async (req, res, next) => {
+    try {
+        const reviews = await Review.find({ userId: req.user.id }).sort({ createdAt: -1 });
+
+        res.status(200).json({
+            success: true,
+            count: reviews.length,
+            data: reviews
+        });
+    } catch (err) {
+        return res.status(500).json({
+            success: false,
+            message: 'Server Error'
+        });
+    }
+};
+
 // @desc    Update review
 // @route   PUT /api/v1/reviews/:reviewId
 // @access  Private
