@@ -1,1 +1,1 @@
-vercel :
+BE vercel : https://se-project-be-68-2-deemaknisit.vercel.app/
