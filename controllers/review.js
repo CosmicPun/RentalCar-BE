@@ -59,42 +59,55 @@ exports.addReview = async (req, res, next) => {
 };
 
 // @desc    Get reviews
-// @route   GET /api/reviews
-// @route   GET /api/cars/:carId/reviews
+// @route   GET /api/reviews (Personal reviews)
+// @route   GET /api/reviews?all=true (All reviews - Admin only)
+// @route   GET /api/cars/:carId/reviews (Car specific reviews)
 // @access  Private for /api/reviews, Public for /api/cars/:carId/reviews
 exports.getReviews = async (req, res, next) => {
     try {
-        const carId = req.params.carId;
+        let query;
 
-        if (carId) {
-            if (!mongoose.Types.ObjectId.isValid(carId)) {
+        // 1. Car reviews (GET /api/cars/:carId/reviews)
+        if (req.params.carId) {
+            if (!mongoose.Types.ObjectId.isValid(req.params.carId)) {
                 return res.status(400).json({
                     success: false,
                     message: 'Invalid car id'
                 });
             }
 
-            const bookings = await Booking.find({ car: carId }).select('_id');
+            const bookings = await Booking.find({ car: req.params.carId }).select('_id');
             const bookingIds = bookings.map((booking) => booking._id);
-            const reviews = await Review.find({ bookingId: { $in: bookingIds } })
-                .sort({ createdAt: -1 });
+            query = { bookingId: { $in: bookingIds } };
+        } 
+        // 2. Personal or All reviews (GET /api/reviews)
+        else {
+            if (!req.user) {
+                return res.status(401).json({
+                    success: false,
+                    message: 'Not authorized to view reviews'
+                });
+            }
 
-            return res.status(200).json({
-                success: true,
-                count: reviews.length,
-                data: reviews
-            });
+            // Check if admin wants all reviews or just their own
+            if (req.user.role === 'admin' && req.query.all === 'true') {
+                query = {};
+            } else {
+                // Default to personal reviews for both users and admins (unless admin specifies all=true)
+                query = { userId: req.user.id };
+            }
         }
 
-        if (!req.user) {
-            return res.status(401).json({
-                success: false,
-                message: 'Not authorized to view reviews'
-            });
-        }
-
-        const query = req.user.role === 'admin' ? {} : { userId: req.user.id };
-        const reviews = await Review.find(query).sort({ createdAt: -1 });
+        const reviews = await Review.find(query)
+            .populate({
+                path: 'bookingId',
+                select: 'car',
+                populate: {
+                    path: 'car',
+                    select: 'brand model licensePlate'
+                }
+            })
+            .sort({ createdAt: -1 });
 
         res.status(200).json({
             success: true,
