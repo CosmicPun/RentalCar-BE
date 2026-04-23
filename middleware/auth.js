@@ -1,13 +1,17 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
+const getBearerToken = (req) => {
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+        return req.headers.authorization.split(' ')[1];
+    }
+
+    return null;
+};
+
 //Protect routes
 exports.protect = async (req, res, next) => {
-    let token;
-
-    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-        token = req.headers.authorization.split(' ')[1];
-    }
+    const token = getBearerToken(req);
 
     //Make sure token exists
     if (!token) {
@@ -17,13 +21,28 @@ exports.protect = async (req, res, next) => {
     try {
         //Verify token
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        console.log(decoded);
         req.user = await User.findById(decoded.id);
         next();
     } catch (err) {
-        console.log(err.stack);
         return res.status(401).json({ success: false, msg: 'Not authorized to access this route' });
     }
+};
+
+exports.optionalProtect = async (req, res, next) => {
+    const token = getBearerToken(req);
+
+    if (!token) {
+        return next();
+    }
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = await User.findById(decoded.id);
+    } catch (err) {
+        req.user = undefined;
+    }
+
+    next();
 };
 
 exports.authorize = (...roles) => {

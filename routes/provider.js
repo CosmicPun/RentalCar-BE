@@ -13,7 +13,7 @@ const bookingRouter = require('./booking');
 
 const router = express.Router();
 
-const { protect, authorize } = require('../middleware/auth');
+const { protect, optionalProtect, authorize } = require('../middleware/auth');
 
 /**
  * @swagger
@@ -66,7 +66,7 @@ const { protect, authorize } = require('../middleware/auth');
  *         description: Forbidden
  */
 router.route('/')
-    .get(getProviders)
+    .get(optionalProtect, getProviders)
     .post(protect, authorize('admin'), createProvider);
 
 /**

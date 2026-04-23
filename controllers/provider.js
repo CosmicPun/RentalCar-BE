@@ -1,6 +1,33 @@
 const Provider = require('../models/Provider');
 const Booking = require('../models/Booking');
 const Car = require('../models/Car');
+const Wishlist = require('../models/Wishlist');
+
+const attachWishlistedStatus = async (providers, userId) => {
+    const providerObjects = providers.map(provider => provider.toObject({ virtuals: true }));
+
+    if (!userId || providerObjects.length === 0) {
+        return providerObjects.map(provider => ({
+            ...provider,
+            wishlisted: false
+        }));
+    }
+
+    const providerIds = providerObjects.map(provider => provider._id);
+    const wishlistItems = await Wishlist.find({
+        userId,
+        providerId: { $in: providerIds }
+    }).select('providerId -_id');
+
+    const wishlistedProviderIds = new Set(
+        wishlistItems.map(item => item.providerId.toString())
+    );
+
+    return providerObjects.map(provider => ({
+        ...provider,
+        wishlisted: wishlistedProviderIds.has(provider._id.toString())
+    }));
+};
 
 // @desc    Get all providers
 // @route   GET /api/v1/providers
@@ -18,9 +45,10 @@ exports.getProviders = async (req, res, next) => {
     // Create query string with MongoDB operators ($gt, $gte, etc.)
     let queryStr = JSON.stringify(reqQuery);
     queryStr = queryStr.replace(/\b(gt|gte|lt|lte|in)\b/g, match => `$${match}`);
+    const filters = JSON.parse(queryStr);
 
     // Finding resource & Populate cars (from Virtual)
-    query = Provider.find(JSON.parse(queryStr)).populate('cars');
+    query = Provider.find(filters).populate('cars');
 
     // Select Fields
     if (req.query.select) {
@@ -41,12 +69,16 @@ exports.getProviders = async (req, res, next) => {
     const limit = parseInt(req.query.limit, 10) || 25;
     const startIndex = (page - 1) * limit;
     const endIndex = page * limit;
-    const total = await Provider.countDocuments();
+    const total = await Provider.countDocuments(filters);
 
     query = query.skip(startIndex).limit(limit);
 
     try {
         const providers = await query;
+        const providersWithWishlist = await attachWishlistedStatus(
+            providers,
+            req.user && req.user._id
+        );
 
         // Pagination result
         const pagination = {};
@@ -61,9 +93,9 @@ exports.getProviders = async (req, res, next) => {
 
         res.status(200).json({
             success: true,
-            count: providers.length,
+            count: providersWithWishlist.length,
             pagination,
-            data: providers
+            data: providersWithWishlist
         });
     } catch (err) {
         next(err);
