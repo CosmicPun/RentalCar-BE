@@ -1,0 +1,565 @@
+{
+  "info": {
+    "name": "Provider Wishlist List Testing",
+    "_postman_id": "9b6f2058-2c5f-4f53-b611-0f8c7a7d42aa",
+    "description": "Postman collection covering guest and authenticated wishlist status on GET /api/providers.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "if (!pm.collectionVariables.get('RUN_SUFFIX')) {",
+          "  const suffix = Date.now().toString();",
+          "  pm.collectionVariables.set('RUN_SUFFIX', suffix);",
+          "  pm.collectionVariables.set('ADMIN_EMAIL', `provider-wishlist.admin.${suffix}@example.com`);",
+          "  pm.collectionVariables.set('USER_EMAIL', `provider-wishlist.user.${suffix}@example.com`);",
+          "  pm.collectionVariables.set('USER2_EMAIL', `provider-wishlist.user2.${suffix}@example.com`);",
+          "}"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "Register Admin",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Provider Wishlist Admin\",\n  \"email\": \"{{ADMIN_EMAIL}}\",\n  \"telephone\": \"0811111111\",\n  \"password\": \"secret123\",\n  \"role\": \"admin\"\n}"
+        },
+        "url": {
+          "raw": "{{URL}}/api/auth/register",
+          "host": [
+            "{{URL}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "register"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Registers admin', () => pm.expect(pm.response.code).to.be.oneOf([200, 201]));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login Admin",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{ADMIN_EMAIL}}\",\n  \"password\": \"secret123\"\n}"
+        },
+        "url": {
+          "raw": "{{URL}}/api/auth/login",
+          "host": [
+            "{{URL}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Logs in admin', () => pm.response.to.have.status(200));",
+              "pm.collectionVariables.set('ADMIN_TOKEN', pm.response.json().token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Register Wishlist User",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Provider Wishlist User\",\n  \"email\": \"{{USER_EMAIL}}\",\n  \"telephone\": \"0822222222\",\n  \"password\": \"secret123\",\n  \"role\": \"user\"\n}"
+        },
+        "url": {
+          "raw": "{{URL}}/api/auth/register",
+          "host": [
+            "{{URL}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "register"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Login Wishlist User",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{USER_EMAIL}}\",\n  \"password\": \"secret123\"\n}"
+        },
+        "url": {
+          "raw": "{{URL}}/api/auth/login",
+          "host": [
+            "{{URL}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Logs in wishlist user', () => pm.response.to.have.status(200));",
+              "pm.collectionVariables.set('USER_TOKEN', pm.response.json().token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Register User Without Wishlist",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Provider Wishlist User 2\",\n  \"email\": \"{{USER2_EMAIL}}\",\n  \"telephone\": \"0833333333\",\n  \"password\": \"secret123\",\n  \"role\": \"user\"\n}"
+        },
+        "url": {
+          "raw": "{{URL}}/api/auth/register",
+          "host": [
+            "{{URL}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "register"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Login User Without Wishlist",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{USER2_EMAIL}}\",\n  \"password\": \"secret123\"\n}"
+        },
+        "url": {
+          "raw": "{{URL}}/api/auth/login",
+          "host": [
+            "{{URL}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Logs in second user', () => pm.response.to.have.status(200));",
+              "pm.collectionVariables.set('USER2_TOKEN', pm.response.json().token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Create Provider A",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{ADMIN_TOKEN}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Provider Wishlist A {{RUN_SUFFIX}}\",\n  \"address\": \"Address A\",\n  \"district\": \"District A\",\n  \"province\": \"Bangkok\",\n  \"postalcode\": \"10110\",\n  \"tel\": \"021111111\",\n  \"region\": \"Central\"\n}"
+        },
+        "url": {
+          "raw": "{{URL}}/api/providers",
+          "host": [
+            "{{URL}}"
+          ],
+          "path": [
+            "api",
+            "providers"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Creates provider A', () => pm.response.to.have.status(201));",
+              "pm.collectionVariables.set('PROVIDER_A_ID', pm.response.json().data._id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Create Provider B",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{ADMIN_TOKEN}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Provider Wishlist B {{RUN_SUFFIX}}\",\n  \"address\": \"Address B\",\n  \"district\": \"District B\",\n  \"province\": \"Bangkok\",\n  \"postalcode\": \"10220\",\n  \"tel\": \"022222222\",\n  \"region\": \"Central\"\n}"
+        },
+        "url": {
+          "raw": "{{URL}}/api/providers",
+          "host": [
+            "{{URL}}"
+          ],
+          "path": [
+            "api",
+            "providers"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Creates provider B', () => pm.response.to.have.status(201));",
+              "pm.collectionVariables.set('PROVIDER_B_ID', pm.response.json().data._id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Get Providers As Guest",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{URL}}/api/providers?name[in]=Provider Wishlist A {{RUN_SUFFIX}},Provider Wishlist B {{RUN_SUFFIX}}&sort=name",
+          "host": [
+            "{{URL}}"
+          ],
+          "path": [
+            "api",
+            "providers"
+          ],
+          "query": [
+            {
+              "key": "name[in]",
+              "value": "Provider Wishlist A {{RUN_SUFFIX}},Provider Wishlist B {{RUN_SUFFIX}}"
+            },
+            {
+              "key": "sort",
+              "value": "name"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Guest provider list succeeds', () => pm.response.to.have.status(200));",
+              "const providers = pm.response.json().data;",
+              "pm.test('Guest providers expose wishlisted=false', () => {",
+              "  pm.expect(providers.length).to.be.greaterThan(0);",
+              "  providers.forEach((provider) => {",
+              "    pm.expect(provider).to.have.property('wishlisted');",
+              "    pm.expect(provider.wishlisted).to.eql(false);",
+              "  });",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Add Provider A To Wishlist",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{USER_TOKEN}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"providerId\": \"{{PROVIDER_A_ID}}\"\n}"
+        },
+        "url": {
+          "raw": "{{URL}}/api/wishlist",
+          "host": [
+            "{{URL}}"
+          ],
+          "path": [
+            "api",
+            "wishlist"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Wishlist entry created', () => pm.response.to.have.status(201));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Get Providers As Authenticated User With Wishlist",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{USER_TOKEN}}"
+          }
+        ],
+        "url": {
+          "raw": "{{URL}}/api/providers?name[in]=Provider Wishlist A {{RUN_SUFFIX}},Provider Wishlist B {{RUN_SUFFIX}}&sort=name",
+          "host": [
+            "{{URL}}"
+          ],
+          "path": [
+            "api",
+            "providers"
+          ],
+          "query": [
+            {
+              "key": "name[in]",
+              "value": "Provider Wishlist A {{RUN_SUFFIX}},Provider Wishlist B {{RUN_SUFFIX}}"
+            },
+            {
+              "key": "sort",
+              "value": "name"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Authenticated provider list succeeds', () => pm.response.to.have.status(200));",
+              "const providers = pm.response.json().data;",
+              "const byId = Object.fromEntries(providers.map((provider) => [provider._id, provider]));",
+              "pm.test('Wishlisted flags are correct', () => {",
+              "  pm.expect(byId['{{PROVIDER_A_ID}}'].wishlisted).to.eql(true);",
+              "  pm.expect(byId['{{PROVIDER_B_ID}}'].wishlisted).to.eql(false);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Get Providers As Authenticated User Without Wishlist",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{USER2_TOKEN}}"
+          }
+        ],
+        "url": {
+          "raw": "{{URL}}/api/providers?name[in]=Provider Wishlist A {{RUN_SUFFIX}},Provider Wishlist B {{RUN_SUFFIX}}&sort=name",
+          "host": [
+            "{{URL}}"
+          ],
+          "path": [
+            "api",
+            "providers"
+          ],
+          "query": [
+            {
+              "key": "name[in]",
+              "value": "Provider Wishlist A {{RUN_SUFFIX}},Provider Wishlist B {{RUN_SUFFIX}}"
+            },
+            {
+              "key": "sort",
+              "value": "name"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Authenticated user without wishlist succeeds', () => pm.response.to.have.status(200));",
+              "const providers = pm.response.json().data;",
+              "pm.test('All wishlisted values are false', () => {",
+              "  providers.forEach((provider) => pm.expect(provider.wishlisted).to.eql(false));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Get Providers With Pagination And Filter",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{USER_TOKEN}}"
+          }
+        ],
+        "url": {
+          "raw": "{{URL}}/api/providers?name[in]=Provider Wishlist A {{RUN_SUFFIX}},Provider Wishlist B {{RUN_SUFFIX}}&sort=name&limit=1&page=1",
+          "host": [
+            "{{URL}}"
+          ],
+          "path": [
+            "api",
+            "providers"
+          ],
+          "query": [
+            {
+              "key": "name[in]",
+              "value": "Provider Wishlist A {{RUN_SUFFIX}},Provider Wishlist B {{RUN_SUFFIX}}"
+            },
+            {
+              "key": "sort",
+              "value": "name"
+            },
+            {
+              "key": "limit",
+              "value": "1"
+            },
+            {
+              "key": "page",
+              "value": "1"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Filtered paginated provider list succeeds', () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test('Pagination and wishlisted field remain present', () => {",
+              "  pm.expect(body.data.length).to.eql(1);",
+              "  pm.expect(body.pagination).to.have.property('next');",
+              "  pm.expect(body.data[0]).to.have.property('wishlisted');",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "URL",
+      "value": "http://localhost:5000"
+    }
+  ]
+}
