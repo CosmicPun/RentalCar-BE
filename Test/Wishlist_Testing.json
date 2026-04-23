@@ -1,0 +1,505 @@
+{
+  "info": {
+    "name": "Wishlist Endpoint Testing",
+    "description": "Postman collection covering authentication, validation, duplicate prevention, and success cases for POST /api/wishlist.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "URL",
+      "value": "http://localhost:5000"
+    },
+    {
+      "key": "USER_NAME",
+      "value": ""
+    },
+    {
+      "key": "USER_EMAIL",
+      "value": ""
+    },
+    {
+      "key": "USER_TELEPHONE",
+      "value": ""
+    },
+    {
+      "key": "USER_PASSWORD",
+      "value": "12345678"
+    },
+    {
+      "key": "ADMIN_NAME",
+      "value": ""
+    },
+    {
+      "key": "ADMIN_EMAIL",
+      "value": ""
+    },
+    {
+      "key": "ADMIN_TELEPHONE",
+      "value": ""
+    },
+    {
+      "key": "ADMIN_PASSWORD",
+      "value": "12345678"
+    },
+    {
+      "key": "USER_TOKEN",
+      "value": ""
+    },
+    {
+      "key": "ADMIN_TOKEN",
+      "value": ""
+    },
+    {
+      "key": "PROVIDER_ID",
+      "value": ""
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "if (!pm.collectionVariables.get('USER_EMAIL')) {",
+          "    const suffix = Date.now();",
+          "    pm.collectionVariables.set('USER_NAME', `Wishlist User ${suffix}`);",
+          "    pm.collectionVariables.set('USER_EMAIL', `wishlist.user.${suffix}@example.com`);",
+          "    pm.collectionVariables.set('USER_TELEPHONE', `08${String(suffix).slice(-8)}`);",
+          "    pm.collectionVariables.set('ADMIN_NAME', `Wishlist Admin ${suffix}`);",
+          "    pm.collectionVariables.set('ADMIN_EMAIL', `wishlist.admin.${suffix}@example.com`);",
+          "    pm.collectionVariables.set('ADMIN_TELEPHONE', `09${String(suffix).slice(-8)}`);",
+          "}"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "Register Wishlist User",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"{{USER_NAME}}\",\n  \"email\": \"{{USER_EMAIL}}\",\n  \"telephone\": \"{{USER_TELEPHONE}}\",\n  \"password\": \"{{USER_PASSWORD}}\",\n  \"role\": \"user\"\n}"
+        },
+        "url": {
+          "raw": "{{URL}}/api/auth/register",
+          "host": [
+            "{{URL}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "register"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('User registered', () => pm.expect([200, 201]).to.include(pm.response.code));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login Wishlist User",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{USER_EMAIL}}\",\n  \"password\": \"{{USER_PASSWORD}}\"\n}"
+        },
+        "url": {
+          "raw": "{{URL}}/api/auth/login",
+          "host": [
+            "{{URL}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('User login successful', () => pm.response.to.have.status(200));",
+              "pm.collectionVariables.set('USER_TOKEN', pm.response.json().token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Register Wishlist Admin",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"{{ADMIN_NAME}}\",\n  \"email\": \"{{ADMIN_EMAIL}}\",\n  \"telephone\": \"{{ADMIN_TELEPHONE}}\",\n  \"password\": \"{{ADMIN_PASSWORD}}\",\n  \"role\": \"admin\"\n}"
+        },
+        "url": {
+          "raw": "{{URL}}/api/auth/register",
+          "host": [
+            "{{URL}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "register"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Admin registered', () => pm.expect([200, 201]).to.include(pm.response.code));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login Wishlist Admin",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{ADMIN_EMAIL}}\",\n  \"password\": \"{{ADMIN_PASSWORD}}\"\n}"
+        },
+        "url": {
+          "raw": "{{URL}}/api/auth/login",
+          "host": [
+            "{{URL}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Admin login successful', () => pm.response.to.have.status(200));",
+              "pm.collectionVariables.set('ADMIN_TOKEN', pm.response.json().token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Create Provider For Wishlist",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{ADMIN_TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Wishlist Provider {{USER_EMAIL}}\",\n  \"address\": \"123 Test Street\",\n  \"district\": \"Pathum Wan\",\n  \"province\": \"Bangkok\",\n  \"postalcode\": \"10330\",\n  \"tel\": \"021234567\",\n  \"region\": \"Central\"\n}"
+        },
+        "url": {
+          "raw": "{{URL}}/api/providers",
+          "host": [
+            "{{URL}}"
+          ],
+          "path": [
+            "api",
+            "providers"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Provider created', () => pm.response.to.have.status(201));",
+              "pm.collectionVariables.set('PROVIDER_ID', pm.response.json().data._id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Unauthorized Wishlist Request",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"providerId\": \"{{PROVIDER_ID}}\"\n}"
+        },
+        "url": {
+          "raw": "{{URL}}/api/wishlist",
+          "host": [
+            "{{URL}}"
+          ],
+          "path": [
+            "api",
+            "wishlist"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Returns 401 when unauthenticated', () => pm.response.to.have.status(401));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Wishlist Invalid Body",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{USER_TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"providerId\": \"invalid-provider-id\"\n}"
+        },
+        "url": {
+          "raw": "{{URL}}/api/wishlist",
+          "host": [
+            "{{URL}}"
+          ],
+          "path": [
+            "api",
+            "wishlist"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Returns 400 for invalid providerId', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Wishlist Non-existing Provider",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{USER_TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"providerId\": \"507f1f77bcf86cd799439011\"\n}"
+        },
+        "url": {
+          "raw": "{{URL}}/api/wishlist",
+          "host": [
+            "{{URL}}"
+          ],
+          "path": [
+            "api",
+            "wishlist"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Returns 404 for missing provider', () => pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Add Wishlist Successfully",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{USER_TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"providerId\": \"{{PROVIDER_ID}}\"\n}"
+        },
+        "url": {
+          "raw": "{{URL}}/api/wishlist",
+          "host": [
+            "{{URL}}"
+          ],
+          "path": [
+            "api",
+            "wishlist"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Creates wishlist entry', () => pm.response.to.have.status(201));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Add Duplicate Wishlist Provider",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{USER_TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"providerId\": \"{{PROVIDER_ID}}\"\n}"
+        },
+        "url": {
+          "raw": "{{URL}}/api/wishlist",
+          "host": [
+            "{{URL}}"
+          ],
+          "path": [
+            "api",
+            "wishlist"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Rejects duplicate wishlist entry', () => pm.response.to.have.status(409));"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
