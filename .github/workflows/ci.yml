@@ -17,6 +17,7 @@ permissions:
 env:
   IMAGE_NAME: se-project-be-68-2-deemaknisit
   DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   # STEP 1: Basic Tests

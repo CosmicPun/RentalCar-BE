@@ -4,9 +4,9 @@ const dotenv = require('dotenv');
 
 dotenv.config({ path: './config/config.env' });
 
-process.env.JWT_SECRET = process.env.JWT_SECRET;
-process.env.JWT_EXPIRE = process.env.JWT_EXPIRE;
-process.env.JWT_COOKIE_EXPIRE = process.env.JWT_COOKIE_EXPIRE;
+process.env.JWT_SECRET = 'secret123';
+process.env.JWT_EXPIRE = '30d';
+process.env.JWT_COOKIE_EXPIRE = '30';
 process.env.NODE_ENV = 'test';
 
 let mongoServer;

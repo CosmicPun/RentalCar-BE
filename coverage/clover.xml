@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1777214788076" clover="3.2.0">
-  <project timestamp="1777214788076" name="All files">
-    <metrics statements="227" coveredstatements="227" conditionals="103" coveredconditionals="103" methods="21" coveredmethods="21" elements="351" coveredelements="351" complexity="0" loc="227" ncloc="227" packages="3" files="9" classes="9"/>
+<coverage generated="1777221918577" clover="3.2.0">
+  <project timestamp="1777221918577" name="All files">
+    <metrics statements="227" coveredstatements="227" conditionals="109" coveredconditionals="106" methods="21" coveredmethods="21" elements="357" coveredelements="354" complexity="0" loc="227" ncloc="227" packages="3" files="9" classes="9"/>
     <package name="controllers">
       <metrics statements="174" coveredstatements="174" conditionals="101" coveredconditionals="101" methods="15" coveredmethods="15"/>
       <file name="review.js" path="C:\Users\User\Documents\CEDT\SW\Project\se-project-be-68-2-deemaknisit\controllers\review.js">
@@ -240,16 +240,16 @@
       </file>
     </package>
     <package name="tests">
-      <metrics statements="20" coveredstatements="20" conditionals="0" coveredconditionals="0" methods="3" coveredmethods="3"/>
+      <metrics statements="20" coveredstatements="20" conditionals="6" coveredconditionals="3" methods="3" coveredmethods="3"/>
       <file name="setup.js" path="C:\Users\User\Documents\CEDT\SW\Project\se-project-be-68-2-deemaknisit\tests\setup.js">
-        <metrics statements="20" coveredstatements="20" conditionals="0" coveredconditionals="0" methods="3" coveredmethods="3"/>
+        <metrics statements="20" coveredstatements="20" conditionals="6" coveredconditionals="3" methods="3" coveredmethods="3"/>
         <line num="1" count="3" type="stmt"/>
         <line num="2" count="3" type="stmt"/>
         <line num="3" count="3" type="stmt"/>
         <line num="5" count="3" type="stmt"/>
-        <line num="7" count="3" type="stmt"/>
-        <line num="8" count="3" type="stmt"/>
-        <line num="9" count="3" type="stmt"/>
+        <line num="7" count="3" type="cond" truecount="1" falsecount="1"/>
+        <line num="8" count="3" type="cond" truecount="1" falsecount="1"/>
+        <line num="9" count="3" type="cond" truecount="1" falsecount="1"/>
         <line num="10" count="3" type="stmt"/>
         <line num="14" count="3" type="stmt"/>
         <line num="16" count="3" type="stmt"/>
