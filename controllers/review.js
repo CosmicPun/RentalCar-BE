@@ -66,66 +66,77 @@ exports.addReview = async (req, res, next) => {
 exports.getReviews = async (req, res, next) => {
     try {
         let query;
-
-        // 1. Car reviews (GET /api/cars/:carId/reviews)
         if (req.params.carId) {
             if (!mongoose.Types.ObjectId.isValid(req.params.carId)) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Invalid car id'
-                });
+                return res.status(400).json({ success: false, message: 'Invalid car id' });
             }
-
             const bookings = await Booking.find({ car: req.params.carId }).select('_id');
             const bookingIds = bookings.map((booking) => booking._id);
-            query = { bookingId: { $in: bookingIds } };
-        } 
-        // 2. Personal or All reviews (GET /api/reviews)
-        else {
-            // Allow public access to all reviews with ?all=true
-            // 1. ?all=true: Show all reviews (Public/Admin)
-            if (req.query.all === 'true') {
-                query = {};
-            } 
-            // 2. Guest: Show all reviews (Public)
-            else if (!req.user) {
-                query = {};
-            } 
-            // 3. Logged-in User: Show personal reviews by default
-            else {
-                query = { userId: req.user.id };
+            query = Review.find({ bookingId: { $in: bookingIds } });
+        } else {
+            if (req.query.all === 'true' || !req.user) {
+                query = Review.find({});
+            } else {
+                query = Review.find({ userId: req.user.id });
             }
         }
 
-        const reviews = await Review.find(query)
-            .populate({
-                path: 'bookingId',
-                select: 'car',
-                populate: {
-                    path: 'car',
-                    select: 'brand model licensePlate picture'
-                }
-            })
-            .populate({
-                path: 'providerId',
-                select: 'name'
-            })
-            .populate({
-                path: 'userId',
-                select: 'name'
-            })
-            .sort({ createdAt: -1 });
+        // Select Fields
+        if (req.query.select) {
+            const fields = req.query.select.split(',').join(' ');
+            query = query.select(fields);
+        }
+
+        // Sort
+        if (req.query.sort) {
+            const sortBy = req.query.sort.split(',').join(' ');
+            query = query.sort(sortBy);
+        } else {
+            query = query.sort('-createdAt');
+        }
+
+        // Pagination
+        const page = parseInt(req.query.page, 10) || 1;
+        const limit = parseInt(req.query.limit, 10) || 25;
+        const startIndex = (page - 1) * limit;
+        const endIndex = page * limit;
+        const total = await Review.countDocuments(query.getFilter());
+
+        query = query.skip(startIndex).limit(limit);
+
+        // Population
+        query = query.populate({
+            path: 'bookingId',
+            select: 'car',
+            populate: { path: 'car', select: 'brand model licensePlate picture' }
+        }).populate({
+            path: 'providerId',
+            select: 'name'
+        }).populate({
+            path: 'userId',
+            select: 'name'
+        });
+
+        const reviews = await query;
+
+        // Pagination result
+        const pagination = {};
+        if (endIndex < total) {
+            pagination.next = { page: page + 1, limit };
+        }
+        if (startIndex > 0) {
+            pagination.prev = { page: page - 1, limit };
+        }
 
         res.status(200).json({
             success: true,
+            total,
             count: reviews.length,
+            pagination,
             data: reviews
         });
     } catch (err) {
-        return res.status(500).json({
-            success: false,
-            message: 'Server Error'
-        });
+        next(err);
     }
 };
 
@@ -164,10 +175,7 @@ exports.getReviewById = async (req, res, next) => {
             data: review
         });
     } catch (err) {
-        return res.status(500).json({
-            success: false,
-            message: 'Server Error'
-        });
+        next(err);
     }
 };
 
@@ -245,10 +253,7 @@ exports.updateReview = async (req, res, next) => {
             });
         }
 
-        return res.status(500).json({
-            success: false,
-            message: 'Server Error'
-        });
+        next(err);
     }
 };
 
@@ -289,9 +294,6 @@ exports.deleteReview = async (req, res, next) => {
             message: 'Review deleted successfully'
         });
     } catch (err) {
-        return res.status(500).json({
-            success: false,
-            message: 'Server Error'
-        });
+        next(err);
     }
 };
