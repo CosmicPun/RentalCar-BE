@@ -1,6 +1,7 @@
 const Booking = require('../models/Booking');
 const Car = require('../models/Car');
 const Provider = require('../models/Provider');
+const Review = require('../models/Review');
 
 // @desc    Get all bookings
 // @route   GET /api/v1/bookings
@@ -262,6 +263,9 @@ exports.deleteBooking = async (req, res, next) => {
         // Mark car as available
         await Car.findByIdAndUpdate(booking.car, { available: true });
 
+        // ลบรีวิวที่เกี่ยวข้องกับการจองนี้
+        await Review.deleteMany({ bookingId: req.params.id });
+        
         await booking.deleteOne();
 
         res.status(200).json({

@@ -1,6 +1,8 @@
 const Provider = require('../models/Provider');
 const Booking = require('../models/Booking');
 const Car = require('../models/Car');
+const Review = require('../models/Review');
+const Wishlist = require('../models/Wishlist');
 
 // @desc    Get all providers
 // @route   GET /api/v1/providers
@@ -142,6 +144,16 @@ exports.deleteProvider = async (req, res, next) => {
         }
 
         // Cascade delete: ลบการจอง (Bookings) และ รถ (Cars) ทั้งหมดที่เกี่ยวข้องกับบริษัทรถเช่านี้
+        const cars = await Car.find({ provider: req.params.id });
+        const carIds = cars.map(car => car._id);
+
+        // ลบ Wishlist ของรถทั้งหมดใน Provider นี้
+        await Wishlist.deleteMany({ carId: { $in: carIds } });
+
+        // ลบรีวิวทั้งหมดที่เกี่ยวข้องกับ Provider นี้
+        await Review.deleteMany({ providerId: req.params.id });
+
+        // ลบรถและการจอง
         await Car.deleteMany({ provider: req.params.id });
         await Booking.deleteMany({ provider: req.params.id });
 
