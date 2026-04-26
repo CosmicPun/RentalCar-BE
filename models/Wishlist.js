@@ -7,9 +7,9 @@ const wishlistSchema = new mongoose.Schema(
             ref: "User",
             required: true,
         },
-        providerId: {
+        carId: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Provider",
+            ref: "Car",
             required: true,
         },
     },
@@ -18,6 +18,6 @@ const wishlistSchema = new mongoose.Schema(
     }
 );
 
-wishlistSchema.index({ userId: 1, providerId: 1 }, { unique: true });
+wishlistSchema.index({ userId: 1, carId: 1 }, { unique: true });
 
 module.exports = mongoose.model("Wishlist", wishlistSchema);
