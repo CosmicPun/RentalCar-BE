@@ -5,7 +5,7 @@ const Car = require('../models/Car');
 // @desc    Add car to wishlist
 // @route   POST /api/wishlist
 // @access  Private
-exports.addWishlistItem = async (req, res, next) => {
+exports.addWishlist = async (req, res, next) => {
     try {
         const { carId } = req.body;
 
@@ -61,9 +61,30 @@ exports.addWishlistItem = async (req, res, next) => {
 // @desc    Get user wishlist
 // @route   GET /api/wishlist
 // @access  Private
-exports.getWishlist = async (req, res, next) => {
+exports.getWishlists = async (req, res, next) => {
     try {
-        const wishlistItems = await Wishlist.find({ userId: req.user.id }).populate({
+        let query;
+
+        // Copy req.query
+        const reqQuery = { ...req.query };
+
+        // Fields to exclude from filtering
+        const removeFields = ['select', 'sort', 'page', 'limit'];
+        removeFields.forEach(param => delete reqQuery[param]);
+
+        // Create query string with MongoDB operators ($gt, $gte, etc.)
+        let queryStr = JSON.stringify(reqQuery);
+        queryStr = queryStr.replace(/\b(gt|gte|lt|lte|in)\b/g, match => `$${match}`);
+
+        let filters = JSON.parse(queryStr);
+
+        // If user is not admin, they can only see their own wishlist
+        if (req.user.role !== 'admin') {
+            filters.userId = req.user.id;
+        }
+
+        // Finding resource
+        query = Wishlist.find(filters).populate({
             path: 'carId',
             populate: {
                 path: 'provider',
@@ -71,18 +92,58 @@ exports.getWishlist = async (req, res, next) => {
             }
         });
 
+        // Select Fields
+        if (req.query.select) {
+            const fields = req.query.select.split(',').join(' ');
+            query = query.select(fields);
+        }
+
+        // Sort
+        if (req.query.sort) {
+            const sortBy = req.query.sort.split(',').join(' ');
+            query = query.sort(sortBy);
+        } else {
+            query = query.sort('-createdAt');
+        }
+
+        // Pagination
+        const page = parseInt(req.query.page, 10) || 1;
+        const limit = parseInt(req.query.limit, 10) || 25;
+        const startIndex = (page - 1) * limit;
+        const endIndex = page * limit;
+        const total = await Wishlist.countDocuments(filters);
+
+        query = query.skip(startIndex).limit(limit);
+
+        const wishlistItems = await query;
+
         // Extract the cars and add the wishlist item ID to each car object
         const wishlistedCars = wishlistItems
             .filter(item => item.carId) // Ensure car still exists
             .map(item => {
                 const car = item.carId.toObject();
-                car.wishlistItemId = item._id; // Add this so frontend can delete easily
+                car.wishlistItemId = item._id;
+                // If admin, show who wishlisted it
+                if (req.user.role === 'admin') {
+                    car.wishlistedBy = item.userId;
+                }
                 return car;
             });
+
+        // Pagination result
+        const pagination = {};
+        if (endIndex < total) {
+            pagination.next = { page: page + 1, limit };
+        }
+        if (startIndex > 0) {
+            pagination.prev = { page: page - 1, limit };
+        }
 
         res.status(200).json({
             success: true,
             count: wishlistedCars.length,
+            total,
+            pagination,
             data: wishlistedCars
         });
     } catch (err) {
@@ -93,7 +154,7 @@ exports.getWishlist = async (req, res, next) => {
 // @desc    Delete wishlist item
 // @route   DELETE /api/wishlist/:id
 // @access  Private
-exports.deleteWishlistItem = async (req, res, next) => {
+exports.deleteWishlist = async (req, res, next) => {
     try {
         const wishlistItem = await Wishlist.findById(req.params.id);
 

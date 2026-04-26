@@ -1,5 +1,5 @@
 const express = require('express');
-const { getWishlist, addWishlistItem, deleteWishlistItem } = require('../controllers/wishlist');
+const { getWishlists, addWishlist, deleteWishlist } = require('../controllers/wishlist');
 const { protect, authorize } = require('../middleware/auth');
 
 const router = express.Router();
@@ -25,7 +25,7 @@ const router = express.Router();
  *       401:
  *         description: Unauthorized
  */
-router.get('/', protect, authorize('user', 'admin'), getWishlist);
+router.get('/', protect, authorize('user', 'admin'), getWishlists);
 
 /**
  * @swagger
@@ -59,7 +59,7 @@ router.get('/', protect, authorize('user', 'admin'), getWishlist);
  *       409:
  *         description: Car already in wishlist
  */
-router.post('/', protect, authorize('user', 'admin'), addWishlistItem);
+router.post('/', protect, authorize('user', 'admin'), addWishlist);
 
 /**
  * @swagger
@@ -84,6 +84,6 @@ router.post('/', protect, authorize('user', 'admin'), addWishlistItem);
  *       404:
  *         description: Wishlist item not found
  */
-router.delete('/:id', protect, authorize('user', 'admin'), deleteWishlistItem);
+router.delete('/:id', protect, authorize('user', 'admin'), deleteWishlist);
 
 module.exports = router;
