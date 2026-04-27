@@ -12,7 +12,7 @@ exports.addReview = async (req, res, next) => {
         if (!comment || comment.trim() === '') {
             return res.status(400).json({
                 success: false,
-                message: 'require your comment'
+                message: 'Please share your thoughts - we require your comment!'
             });
         }
 
@@ -31,6 +31,15 @@ exports.addReview = async (req, res, next) => {
             return res.status(401).json({
                 success: false,
                 message: `User ${req.user.id} is not authorized to add a review for this booking`
+            });
+        }
+
+        // Check if booking is completed
+        const now = new Date();
+        if (booking.returnDate > now && req.user.role !== 'admin') {
+            return res.status(400).json({
+                success: false,
+                message: 'No completed booking'
             });
         }
 
@@ -213,7 +222,7 @@ exports.updateReview = async (req, res, next) => {
         if (req.body.comment !== undefined && (req.body.comment === null || req.body.comment.trim() === '')) {
             return res.status(400).json({
                 success: false,
-                message: 'require your comment'
+                message: 'Please share your thoughts - we require your comment!'
             });
         }
 
