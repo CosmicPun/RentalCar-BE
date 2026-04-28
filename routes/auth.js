@@ -111,36 +111,6 @@ router.get('/logout', logout);
  *         description: User not found
  */
 router.get('/me', protect, getMe);
-
-/**
- * @swagger
- * /api/auth/update:
- *   put:
- *     summary: Update current authenticated user profile
- *     tags: [Auth]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *               email:
- *                 type: string
- *               telephone:
- *                 type: string
- *     responses:
- *       200:
- *         description: User updated successfully
- *       401:
- *         description: Unauthorized
- *       404:
- *         description: User not found
- */
 router.put('/update', protect, update);
 
 module.exports = router;

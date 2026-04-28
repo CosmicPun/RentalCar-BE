@@ -28,7 +28,7 @@ router.route('/:carId/reviews').get(getReviews);
 
 /**
  * @swagger
- * /api/cars:
+ * /api/car:
  *   get:
  *     summary: Get all cars
  *     tags: [Cars]
@@ -88,7 +88,7 @@ router.route('/')
 
 /**
  * @swagger
- * /api/cars/{id}:
+ * /api/car/{id}:
  *   get:
  *     summary: Get car by ID
  *     tags: [Cars]

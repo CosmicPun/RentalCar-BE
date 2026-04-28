@@ -21,7 +21,7 @@ const { protect, authorize } = require('../middleware/auth');
 
 /**
  * @swagger
- * /api/cars/{carId}/bookings:
+ * /api/car/{carId}/bookings:
  *   get:
  *     summary: Get bookings (optionally by car)
  *     tags: [Bookings]
@@ -80,7 +80,7 @@ router.route('/')
 
 /**
  * @swagger
- * /api/cars/{carId}/bookings/{id}:
+ * /api/car/{carId}/bookings/{id}:
  *   get:
  *     summary: Get a booking by ID
  *     tags: [Bookings]
