@@ -9,7 +9,7 @@ const xss = require('xss');
 const rateLimit = require('express-rate-limit');
 const hpp = require('hpp');
 const cors = require('cors');
-const { swaggerUi, swaggerSpec } = require('./config/swagger');
+const { swaggerSpec } = require('./config/swagger');
 
 
 // Routes
@@ -36,8 +36,41 @@ const app = express();
 app.set('query parser', 'extended');              // Parse query strings as objects
 app.use(express.json());                          // JSON Parsing
 app.use(cors());                                  // CORS for frontend requests
-// Swagger UI must be mounted before helmet CSP headers to avoid a blank page in production
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+// Serve Swagger UI with CDN assets so Vercel does not need to proxy local static bundles.
+app.get(['/api-docs', '/api-docs/'], (req, res) => {
+        res.set('Content-Type', 'text/html; charset=utf-8');
+        res.send(`<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Rental Car Booking API Docs</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css" />
+        <style>
+            html, body { margin: 0; padding: 0; background: #fafafa; }
+            #swagger-ui { margin: 0; }
+        </style>
+    </head>
+    <body>
+        <div id="swagger-ui"></div>
+        <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-standalone-preset.js"></script>
+        <script>
+            window.onload = () => {
+                window.ui = SwaggerUIBundle({
+                    spec: ${JSON.stringify(swaggerSpec)},
+                    dom_id: '#swagger-ui',
+                    deepLinking: true,
+                    presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
+                    layout: 'BaseLayout'
+                });
+            };
+        </script>
+    </body>
+</html>`);
+});
+
 app.use(helmet());                                // Security Headers 
 app.use(mongoSanitize());                         // Sanitize data
 
