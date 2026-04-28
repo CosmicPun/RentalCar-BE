@@ -23,6 +23,8 @@ describe('Review Controller (Integration)', () => {
         provider = await Provider.create({ name: `P${suffix}`, address: 'A', district: 'D', province: 'P', postalcode: '12345', tel: '021234567', region: 'R' });
         car = await Car.create({ brand: 'B', model: 'M', licensePlate: `LP-${suffix}`, year: 2022, color: 'B', transmission: 'Automatic', rentPrice: 100, provider: provider._id });
         booking = await Booking.create({ bookingDate: '2026-05-01', returnDate: '2026-05-03', user: user._id, car: car._id, provider: provider._id, totalCost: 200 });
+        booking.status = 'complete';
+        await booking.save();
     });
 
     describe('addReview', () => {
@@ -59,6 +61,14 @@ describe('Review Controller (Integration)', () => {
             await Review.create({ bookingId: booking._id, userId: user._id, providerId: provider._id, rating: 5, comment: 't' });
             req.user = user;
             req.body = { bookingId: booking._id.toString(), rating: 5, comment: 't' };
+            await addReview(req, res, next);
+            expect(res.status).toHaveBeenCalledWith(400);
+        });
+
+        it('should return 400 for incomplete booking', async () => {
+            const pendingBooking = await Booking.create({ bookingDate: '2026-05-01', returnDate: '2026-05-03', user: user._id, car: car._id, provider: provider._id, totalCost: 200, status: 'pending' });
+            req.user = user;
+            req.body = { bookingId: pendingBooking._id.toString(), rating: 5, comment: 'Good' };
             await addReview(req, res, next);
             expect(res.status).toHaveBeenCalledWith(400);
         });
