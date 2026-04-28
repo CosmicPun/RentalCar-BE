@@ -118,14 +118,22 @@ exports.getBooking = async (req, res, next) => {
 // @access  Private
 exports.addBooking = async (req, res, next) => {
     try {
-        req.body.car = req.params.carId;
+        const carId = req.params.carId || req.body.carId;
+        req.body.car = carId;
+
+        if (!carId) {
+            return res.status(400).json({
+                success: false,
+                message: 'Car ID is required'
+            });
+        }
 
         // Find car and its provider
-        const car = await Car.findById(req.params.carId);
+        const car = await Car.findById(carId);
         if (!car) {
             return res.status(404).json({
                 success: false,
-                message: `No car with the id of ${req.params.carId}`
+                message: `No car with the id of ${carId}`
             });
         }
 
@@ -133,7 +141,7 @@ exports.addBooking = async (req, res, next) => {
         if (!car.available) {
             return res.status(400).json({
                 success: false,
-                message: `Car with ID ${req.params.carId} is not available`
+                message: `Car with ID ${carId} is not available`
             });
         }
 

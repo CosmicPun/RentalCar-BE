@@ -28,7 +28,7 @@ const { protect, authorize, optionalProtect } = require('../middleware/auth');
 
 /**
  * @swagger
- * /api/provider:
+ * /api/providers:
  *   get:
  *     summary: Get all providers
  *     tags: [Providers]
@@ -71,7 +71,7 @@ router.route('/')
 
 /**
  * @swagger
- * /api/provider/{id}:
+ * /api/providers/{id}:
  *   get:
  *     summary: Get provider by ID
  *     tags: [Providers]

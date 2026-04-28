@@ -28,7 +28,7 @@ router.route('/:carId/reviews').get(getReviews);
 
 /**
  * @swagger
- * /api/car:
+ * /api/cars:
  *   get:
  *     summary: Get all cars
  *     tags: [Cars]
@@ -88,7 +88,7 @@ router.route('/')
 
 /**
  * @swagger
- * /api/car/{id}:
+ * /api/cars/{id}:
  *   get:
  *     summary: Get car by ID
  *     tags: [Cars]
@@ -157,5 +157,26 @@ router.route('/:id')
     .get(optionalProtect, getCar)
     .put(protect, authorize('admin'), updateCar)
     .delete(protect, authorize('admin'), deleteCar);
+
+/**
+ * @swagger
+ * /api/cars/{carId}/reviews:
+ *   get:
+ *     summary: Get reviews for a specific car
+ *     tags: [Cars]
+ *     parameters:
+ *       - in: path
+ *         name: carId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Car ID
+ *     responses:
+ *       200:
+ *         description: List of reviews for the car
+ *       400:
+ *         description: Invalid car ID
+ */
+router.route('/:carId/reviews').get(getReviews);
 
 module.exports = router;

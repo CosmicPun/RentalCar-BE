@@ -21,19 +21,12 @@ const { protect, authorize } = require('../middleware/auth');
 
 /**
  * @swagger
- * /api/car/{carId}/bookings:
+ * /api/bookings:
  *   get:
- *     summary: Get bookings (optionally by car)
+ *     summary: Get bookings for the current user
  *     tags: [Bookings]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: carId
- *         required: false
- *         schema:
- *           type: string
- *         description: Car ID (when nested under /cars)
  *     responses:
  *       200:
  *         description: List of bookings
@@ -44,24 +37,23 @@ const { protect, authorize } = require('../middleware/auth');
  *     tags: [Bookings]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: carId
- *         required: true
- *         schema:
- *           type: string
- *         description: Car ID
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - carId
+ *               - bookingDate
+ *               - returnDate
  *             properties:
- *               startDate:
+ *               carId:
+ *                 type: string
+ *               bookingDate:
  *                 type: string
  *                 format: date-time
- *               endDate:
+ *               returnDate:
  *                 type: string
  *                 format: date-time
  *     responses:
@@ -80,18 +72,13 @@ router.route('/')
 
 /**
  * @swagger
- * /api/car/{carId}/bookings/{id}:
+ * /api/bookings/{id}:
  *   get:
  *     summary: Get a booking by ID
  *     tags: [Bookings]
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - in: path
- *         name: carId
- *         required: false
- *         schema:
- *           type: string
  *       - in: path
  *         name: id
  *         required: true
@@ -105,17 +92,33 @@ router.route('/')
  *         description: Unauthorized
  *       404:
  *         description: Booking not found
+ *   delete:
+ *     summary: Delete a booking by ID
+ *     tags: [Bookings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Booking ID
+ *     responses:
+ *       200:
+ *         description: Booking deleted successfully
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Booking not found
  *   put:
  *     summary: Update a booking by ID
  *     tags: [Bookings]
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - in: path
- *         name: carId
- *         required: false
- *         schema:
- *           type: string
  *       - in: path
  *         name: id
  *         required: true
@@ -137,17 +140,21 @@ router.route('/')
  *         description: Forbidden
  *       404:
  *         description: Booking not found
- *   delete:
- *     summary: Delete a booking by ID
+ */
+router.route('/:id')
+    .get(protect, getBooking)
+    .put(protect, authorize('user', 'admin'), updateBooking)
+    .delete(protect, authorize('user', 'admin'), deleteBooking);
+
+/**
+ * @swagger
+ * /api/bookings/{id}/complete:
+ *   put:
+ *     summary: Mark a booking as completed
  *     tags: [Bookings]
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - in: path
- *         name: carId
- *         required: false
- *         schema:
- *           type: string
  *       - in: path
  *         name: id
  *         required: true
@@ -156,7 +163,7 @@ router.route('/')
  *         description: Booking ID
  *     responses:
  *       200:
- *         description: Booking deleted successfully
+ *         description: Booking completed successfully
  *       401:
  *         description: Unauthorized
  *       403:
@@ -164,11 +171,6 @@ router.route('/')
  *       404:
  *         description: Booking not found
  */
-router.route('/:id')
-    .get(protect, getBooking)
-    .put(protect, authorize('user', 'admin'), updateBooking)
-    .delete(protect, authorize('user', 'admin'), deleteBooking);
-
 router.route('/:id/complete')
     .put(protect, authorize('user', 'admin'), completeBooking);
 
